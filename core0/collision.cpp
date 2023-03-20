@@ -29,6 +29,10 @@ namespace snake
 				collision = static_cast<CollisionFlag>(
 						static_cast<CollisionFlag>(collision)
 						| static_cast<CollisionFlag>(apple));
+
+				collision = static_cast<CollisionFlag>(
+						static_cast<CollisionFlag>(collision)
+						| static_cast<CollisionFlag>(bodyApple));
 			}
 
 			if( head->m_xPos < GRID_START_X ||

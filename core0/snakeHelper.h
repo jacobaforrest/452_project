@@ -65,9 +65,35 @@ namespace snake
 
 	void Render(state gameState, bool showHead = true, bool renderSnake = true, bool highScore = false, int cursorPosition = 0, int volume = 5);
 
+	void AltRender(bool showHead = true, bool renderSnake = true, bool highScore = false);
+
+	void DrawDirectionfulSnakeComponent(SnakeDirection thisDirection, SnakeDirection nextDirection,
+											s32 xPos, s32 yPos,
+											snake::render::Sprite* horizontal, snake::render::Sprite* vertical,
+											snake::render::Sprite* nw, snake::render::Sprite* ne,
+											snake::render::Sprite* sw, snake::render::Sprite* se);
+
 	void move_snake(SnakeDirection currentDirection);
 
+	void UpdateScore();
+	void ResetScore();
+	u32 GetScore();
 
+	void GetHighScores(u32 outHighScores[5]);
+	void UpdateHighScores(u32 score);
+
+	void PrintScore(u32 score, u32 xPos, u32 yPos);
+	void PrintHighScores(u32 xPos, u32 yPos);
+
+	bool UpdateTime(u32 us);
+	void ResetTime();
+	u32 GetTime();
+
+	void PrintTime(u32 seconds, u32 xPos, u32 yPos);
+
+	void SetHardMode(bool isHardMode);
+
+	u64 GetTimeOut(u64 baseTimeOut);
 }
 
 #endif // SNAKEHELPER_H

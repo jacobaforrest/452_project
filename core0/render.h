@@ -23,7 +23,7 @@
 // #define RENDER_SCALE = CANVAS_HEIGHT / RENDER_HEIGHT
 
 // can be changed as needed. caps unique sprites in game
-#define SPRITE_COUNT	64
+#define SPRITE_COUNT	128
 
 #define CLEAR_COLOR 0x00000000
 

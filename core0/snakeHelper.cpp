@@ -22,6 +22,15 @@ namespace snake
 	u32 spawnX = 0, spawnY = 0;
 	SnakeDirection spawnDirection = East;
 
+	u32 score = 0;
+	u32 appleGetCount = 0;
+
+	u32 usTime = 0;
+	u32 sTime = 0;
+
+	u32 highScores[5] = {200,100,50,20,10};
+
+	bool hardMode = false;
 
 	void Init()
 	{
@@ -101,7 +110,7 @@ namespace snake
 		}
 
 
-
+		xil_printf("Spawning Apple with coordinates: %i, %i\r\n", appleX, appleY);
 	}
 
 	void GetApplePosition(u32& outX, u32& outY)
@@ -449,10 +458,13 @@ namespace snake
 
 				break;
 			}
-
+			case pre_gameover:
 			case gameplay:
 			{
 				snake::render::DrawBackground(snake::render::GetCanvas(), background);
+
+				PrintTime(GetTime(), 32, 0);
+				PrintScore(GetScore(), 288, 0);
 
 				// snake head
 				if(snakeComponents[0].m_init)
@@ -463,64 +475,125 @@ namespace snake
 					{
 						case North:
 						{
-							head = snake::render::GetSprite(snake::sprites::headN);
+							head = snake::render::GetSprite(snake::sprites::headN1);
 							break;
 						}
 						case South:
 						{
-							head = snake::render::GetSprite(snake::sprites::headS);
+							head = snake::render::GetSprite(snake::sprites::headS1);
 							break;
 						}
 						case East:
 						{
-							head = snake::render::GetSprite(snake::sprites::headE);
+							head = snake::render::GetSprite(snake::sprites::headE1);
 							break;
 						}
 						case West:
 						{
-							head = snake::render::GetSprite(snake::sprites::headW);
+							head = snake::render::GetSprite(snake::sprites::headW1);
 							break;
 						}
 
 						assert(head);
 					}
 
-					snake::render::PaintToCanvas(
-						snake::render::GetCanvas(),
-						head,
-						snakeComponents[0].m_xPos,
-						snakeComponents[0].m_yPos
-					);
+					if(showHead)
+					{
+						snake::render::PaintToCanvas(
+							snake::render::GetCanvas(),
+							head,
+							snakeComponents[0].m_xPos,
+							snakeComponents[0].m_yPos
+						);
+					}
 				}
 
 				// snake body
 				int index = 1;
 
-				snake::render::Sprite* body1 = snake::render::GetSprite(snake::sprites::body1);
-				snake::render::Sprite* body2 = snake::render::GetSprite(snake::sprites::body2);
-
-				while(snakeComponents[index].m_init)
+				if(renderSnake)
 				{
-					if((index & 1) == 0)
+					while(snakeComponents[index].m_init && snakeComponents[index + 1].m_init)
 					{
-						snake::render::PaintToCanvas(
-							snake::render::GetCanvas(),
-							body1,
-							snakeComponents[index].m_xPos,
-							snakeComponents[index].m_yPos
-						);
-					}
-					else
-					{
-						snake::render::PaintToCanvas(
-							snake::render::GetCanvas(),
-							body2,
-							snakeComponents[index].m_xPos,
-							snakeComponents[index].m_yPos
-						);
+						if((index & 1) == 0)
+						{
+							DrawDirectionfulSnakeComponent(snakeComponents[index - 1].m_direction, snakeComponents[index].m_direction,
+									snakeComponents[index].m_xPos, snakeComponents[index].m_yPos,
+									snake::render::GetSprite(snake::sprites::bodyLightH1),
+									snake::render::GetSprite(snake::sprites::bodyLightV1),
+									snake::render::GetSprite(snake::sprites::bodyLightNW1),
+									snake::render::GetSprite(snake::sprites::bodyLightNE1),
+									snake::render::GetSprite(snake::sprites::bodyLightSW1),
+									snake::render::GetSprite(snake::sprites::bodyLightSE1)
+								);
+						}
+						else
+						{
+							DrawDirectionfulSnakeComponent(snakeComponents[index - 1].m_direction, snakeComponents[index].m_direction,
+									snakeComponents[index].m_xPos, snakeComponents[index].m_yPos,
+									snake::render::GetSprite(snake::sprites::bodyDarkH1),
+									snake::render::GetSprite(snake::sprites::bodyDarkV1),
+									snake::render::GetSprite(snake::sprites::bodyDarkNW1),
+									snake::render::GetSprite(snake::sprites::bodyDarkNE1),
+									snake::render::GetSprite(snake::sprites::bodyDarkSW1),
+									snake::render::GetSprite(snake::sprites::bodyDarkSE1)
+								);
+						}
+
+						++index;
 					}
 
-					++index;
+					// snake tail
+					if(snakeComponents[index].m_init)
+					{
+						snake::render::Sprite* tail = NULL;
+
+						if((index & 1) == 0)
+						{
+							switch(snakeComponents[index - 1].m_direction)
+							{
+								case North:
+								tail = snake::render::GetSprite(snake::sprites::tailLightN1);
+								break;
+								case South:
+								tail = snake::render::GetSprite(snake::sprites::tailLightS1);
+								break;
+								case East:
+								tail = snake::render::GetSprite(snake::sprites::tailLightE1);
+								break;
+								case West:
+								tail = snake::render::GetSprite(snake::sprites::tailLightW1);
+								default:
+								break;
+							}
+						}
+						else
+						{
+							switch(snakeComponents[index - 1].m_direction)
+							{
+								case North:
+								tail = snake::render::GetSprite(snake::sprites::tailDarkN1);
+								break;
+								case South:
+								tail = snake::render::GetSprite(snake::sprites::tailDarkS1);
+								break;
+								case East:
+								tail = snake::render::GetSprite(snake::sprites::tailDarkE1);
+								break;
+								case West:
+								tail = snake::render::GetSprite(snake::sprites::tailDarkW1);
+								default:
+								break;
+							}
+						}
+
+						snake::render::PaintToCanvas(
+							snake::render::GetCanvas(),
+							tail,
+							snakeComponents[index].m_xPos,
+							snakeComponents[index].m_yPos
+						);
+					}
 				}
 
 				// draw apple
@@ -572,6 +645,89 @@ namespace snake
 		snake::render::Draw();
 	}
 
+	void AltRender(bool showHead, bool renderSnake, bool highScore)
+	{
+
+	}
+
+	void DrawDirectionfulSnakeComponent(SnakeDirection thisDirection, SnakeDirection nextDirection,
+										s32 xPos, s32 yPos,
+										snake::render::Sprite* horizontal, snake::render::Sprite* vertical, snake::render::Sprite* nw, snake::render::Sprite* ne, snake::render::Sprite* sw, snake::render::Sprite* se)
+	{
+		snake::render::Sprite* drawingSprite = NULL;
+
+		if(thisDirection == North)
+		{
+			if(nextDirection == North || nextDirection == South)
+			{
+				drawingSprite = vertical;
+			}
+			else if(nextDirection == East)
+			{
+				drawingSprite = nw;
+			}
+			else if(nextDirection == West)
+			{
+				drawingSprite = ne;
+			}
+		}
+		else if (thisDirection == South)
+		{
+			if(nextDirection == North || nextDirection == South)
+			{
+				drawingSprite = vertical;
+			}
+			else if(nextDirection == East)
+			{
+				drawingSprite = sw;
+			}
+			else if(nextDirection == West)
+			{
+				drawingSprite = se;
+			}
+		}
+		else if (thisDirection == East)
+		{
+			if(nextDirection == East || nextDirection == West)
+			{
+				drawingSprite = horizontal;
+			}
+			else if(nextDirection == North)
+			{
+				drawingSprite = se;
+			}
+			else if(nextDirection == South)
+			{
+				drawingSprite = ne;
+			}
+		}
+		else // West
+		{
+			if(nextDirection == East || nextDirection == West)
+			{
+				drawingSprite = horizontal;
+			}
+			else if(nextDirection == North)
+			{
+				drawingSprite = sw;
+			}
+			else if(nextDirection == South)
+			{
+				drawingSprite = nw;
+			}
+		}
+
+		if(drawingSprite)
+		{
+			snake::render::PaintToCanvas(
+				snake::render::GetCanvas(),
+				drawingSprite,
+				xPos,
+				yPos
+			);
+		}
+	}
+
 	void move_snake(SnakeDirection currentDirection)
 	{
 		xil_printf("Snake moved forward one unit\r\n");
@@ -613,6 +769,307 @@ namespace snake
 			}
 		}
 	}
+
+	void UpdateScore()
+	{
+		++appleGetCount;
+
+		if(score < 100)
+		{
+			score += 10;
+		}
+		else if(score < 1000)
+		{
+			score += 100;
+		}
+		else if(score < 10000)
+		{
+			score += 1000;
+		}
+		else
+		{
+			score += 10000;
+		}
+	}
+
+	void ResetScore()
+	{
+		score = 0;
+		appleGetCount = 0;
+	}
+
+	u32 GetScore()
+	{
+		return score;
+	}
+
+	void GetHighScores(u32 outHighScores[5])
+	{
+		for(int i = 0; i < 5; ++i)
+		{
+			outHighScores[i] = highScores[i];
+		}
+	}
+
+	void UpdateHighScores(u32 score)
+	{
+		if(score > highScores[4])
+		{
+			highScores[4] = score;
+
+			for(int i = 4; i > 0; --i)
+			{
+				if(highScores[i] > highScores[i - 1])
+				{
+					u32 temp = highScores[i - 1];
+					highScores[i - 1] = highScores[i];
+					highScores[i] = temp;
+				}
+			}
+		}
+	}
+
+	void PrintScore(u32 score, u32 xPos, u32 yPos)
+	{
+		const snake::sprites::SpriteIndex indicies[] =
+		{
+			snake::sprites::zero,
+			snake::sprites::one,
+			snake::sprites::two,
+			snake::sprites::three,
+			snake::sprites::four,
+			snake::sprites::five,
+			snake::sprites::six,
+			snake::sprites::seven,
+			snake::sprites::eight,
+			snake::sprites::nine
+		};
+
+		snake::sprites::SpriteIndex millions, hundredthousands, tenthousands, thousands, hundreds, tens, ones;
+
+		// this could prob be turned into a function. too bad!
+		millions = indicies[score / 1000000];
+		score -= (score / 1000000) * 1000000;
+		hundredthousands = indicies[score / 100000];
+		score -= (score / 100000) * 100000;
+		tenthousands = indicies[score / 10000];
+		score -= (score / 10000) * 10000;
+		thousands = indicies[score / 1000];
+		score -= (score / 1000) * 1000;
+		hundreds = indicies[score / 100];
+		score -= (score / 100) * 100;
+		tens = indicies[score / 10];
+		score -= (score / 10) * 10;
+		ones = indicies[score];
+
+		snake::render::PaintToCanvas(
+			snake::render::GetCanvas(),
+			snake::render::GetSprite(snake::sprites::SCORE),
+			xPos,
+			yPos
+		);
+
+		xPos += snake::sprites::SpriteWidths[snake::sprites::SCORE];
+
+		// this is almost the worst code i've written...
+		bool nonZero = false;
+		nonZero = nonZero || millions != snake::sprites::zero;
+		if(nonZero)
+		{
+			snake::render::PaintToCanvas(
+				snake::render::GetCanvas(),
+				snake::render::GetSprite(millions),
+				xPos,
+				yPos
+			);
+		}
+		xPos += snake::sprites::SpriteWidths[millions];
+
+		nonZero = nonZero || hundredthousands != snake::sprites::zero;
+		if(nonZero)
+		{
+			snake::render::PaintToCanvas(
+				snake::render::GetCanvas(),
+				snake::render::GetSprite(hundredthousands),
+				xPos,
+				yPos
+			);
+		}
+		xPos += snake::sprites::SpriteWidths[hundredthousands];
+
+		nonZero = nonZero || tenthousands != snake::sprites::zero;
+		if(nonZero)
+		{
+			snake::render::PaintToCanvas(
+				snake::render::GetCanvas(),
+				snake::render::GetSprite(tenthousands),
+				xPos,
+				yPos
+			);
+		}
+		xPos += snake::sprites::SpriteWidths[tenthousands];
+
+		nonZero = nonZero || thousands != snake::sprites::zero;
+		if(nonZero)
+		{
+			snake::render::PaintToCanvas(
+				snake::render::GetCanvas(),
+				snake::render::GetSprite(thousands),
+				xPos,
+				yPos
+			);
+		}
+		xPos += snake::sprites::SpriteWidths[thousands];
+
+		nonZero = nonZero || hundreds != snake::sprites::zero;
+		if(nonZero)
+		{
+			snake::render::PaintToCanvas(
+				snake::render::GetCanvas(),
+				snake::render::GetSprite(hundreds),
+				xPos,
+				yPos
+			);
+		}
+		xPos += snake::sprites::SpriteWidths[hundreds];
+
+		nonZero = nonZero || tens != snake::sprites::zero;
+		if(nonZero)
+		{
+			snake::render::PaintToCanvas(
+				snake::render::GetCanvas(),
+				snake::render::GetSprite(tens),
+				xPos,
+				yPos
+			);
+		}
+		xPos += snake::sprites::SpriteWidths[tens];
+
+		snake::render::PaintToCanvas(
+			snake::render::GetCanvas(),
+			snake::render::GetSprite(ones),
+			xPos,
+			yPos
+		);
+	}
+
+	void PrintHighScores(u32 xPos, u32 yPos)
+	{
+
+	}
+
+	bool UpdateTime(u32 us)
+	{
+		usTime += us;
+
+		if(usTime >= 1000000)
+		{
+			usTime -= 1000000;
+			++sTime;
+			return true;
+		}
+
+		return false;
+	}
+
+	void ResetTime()
+	{
+		usTime = 0;
+		sTime = 0;
+	}
+
+	u32 GetTime()
+	{
+		return sTime;
+	}
+
+	void PrintTime(u32 seconds, u32 xPos, u32 yPos)
+	{
+		const snake::sprites::SpriteIndex indicies[] =
+		{
+			snake::sprites::zero,
+			snake::sprites::one,
+			snake::sprites::two,
+			snake::sprites::three,
+			snake::sprites::four,
+			snake::sprites::five,
+			snake::sprites::six,
+			snake::sprites::seven,
+			snake::sprites::eight,
+			snake::sprites::nine
+		};
+
+		snake::sprites::SpriteIndex hundreds, tens, ones;
+
+		if(seconds >= 999)
+		{
+			hundreds = tens = ones = indicies[9];
+		}
+		else
+		{
+			// this could prob be turned into a function. too bad!
+			hundreds = indicies[seconds / 100];
+			seconds -= (seconds / 100) * 100;
+			tens = indicies[seconds / 10];
+			seconds -= (seconds / 10) * 10;
+			ones = indicies[seconds];
+		}
+
+		snake::render::PaintToCanvas(
+			snake::render::GetCanvas(),
+			snake::render::GetSprite(snake::sprites::clock),
+			xPos,
+			yPos
+		);
+
+		xPos += snake::sprites::SpriteWidths[snake::sprites::clock];
+
+		bool nonZero = false;
+		nonZero = nonZero || hundreds != snake::sprites::zero;
+		if(nonZero)
+		{
+			snake::render::PaintToCanvas(
+				snake::render::GetCanvas(),
+				snake::render::GetSprite(hundreds),
+				xPos,
+				yPos
+			);
+		}
+		xPos += snake::sprites::SpriteWidths[hundreds];
+
+		nonZero = nonZero || tens != snake::sprites::zero;
+		if(nonZero)
+		{
+			snake::render::PaintToCanvas(
+				snake::render::GetCanvas(),
+				snake::render::GetSprite(tens),
+				xPos,
+				yPos
+			);
+		}
+		xPos += snake::sprites::SpriteWidths[tens];
+
+		snake::render::PaintToCanvas(
+			snake::render::GetCanvas(),
+			snake::render::GetSprite(ones),
+			xPos,
+			yPos
+		);
+	}
+
+	void SetHardMode(bool isHardMode)
+	{
+		hardMode = isHardMode;
+	}
+
+	u64 GetTimeOut(u64 baseTimeOut)
+	{
+		if(!hardMode)
+		{
+			return baseTimeOut;
+		}
+
+		// stub. will have altered time in hard mode.
+		return baseTimeOut;
+	}
 }
-
-
