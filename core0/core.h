@@ -9,13 +9,10 @@
 #include <xil_printf.h>
 #include <xparameters.h>
 #include <xbasic_types.h>
-//#include "xgpio.h"
+#include "xgpio.h"
 #include "xuartps.h"
 #include "stdlib.h"
 #include "xtime_l.h"
-#include "xil_mmu.h"
-#include "xscugic.h"
-#include "xtmrctr.h"
 
 #include "snakeHelper.h"
 
@@ -51,8 +48,7 @@ void decrease_volume();
 void start_game();
 void draw_gameover_menu(int currentIndex);
 void menu_return();
-void play_apple_sound_effect();
-void play_crash_sound_effect();
+void play_sound_effect();
 void change_direction(direction* newDirection, direction dir);
 void extend_snake();
 void spawn_apple(u32 location);
@@ -62,10 +58,9 @@ void resume_game();
 void update_score();
 void clear_inputs();
 
+
+
 /* ---------------------------------------------------------------------------- *
  * 						Redefinitions from xparameters.h 						*
  * ---------------------------------------------------------------------------- */
 #define UART_BASEADDR XPAR_PS7_UART_1_BASEADDR
-
-
-

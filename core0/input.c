@@ -1,5 +1,3 @@
-
-/*
 #include "input.h"
 
 #include "xgpio.h"
@@ -109,7 +107,7 @@ int snake_InitInterrupt()
 	XGpio_InterruptGlobalEnable(&BTNInst);
 
 	XScuGic_Enable(&INTCInst, INTC_GPIO_INTERRUPT_ID);
-	*./
+	*/
 
 	int status;
 	//----------------------------------------------------
@@ -134,4 +132,4 @@ u32 snake_GetInputFlags()
 	u32 out = inputDataBuffer & ~inputDataPrevBuffer;
  	inputDataPrevBuffer = inputDataBuffer;
 	return out;
-}*/
+}

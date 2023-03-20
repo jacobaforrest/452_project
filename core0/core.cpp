@@ -1,5 +1,5 @@
 #include "core.h"
-#include <atomic>
+
 #include "collision.h"
 
 /* ---------------------------------------------------------------------------- *
@@ -30,32 +30,12 @@ const char* options[] =
 	"Return" // Volume Menu, Highscore Menu, Gameover Menu
 };
 
-u64 timeout_us = 200000;
-u64 gameoverTimeoutUs = 20000;
-u64 mini_timeout_us = 2000;
+u64 timeout_us = 500000;
+u64 gameoverTimeoutUs = 250000;
+u64 mini_timeout_us = 5000;
 int tempMovementCounter = 0;
-Xuint32 *RNG_BASEADDR_p = (Xuint32 *)(XPAR_RNG_0_S00_AXI_BASEADDR); //output stored in register 0
-
-unsigned int volume = 5;
-
-//#define VOL_VAL (*(volatile unsigned int *)(0xFFFF0000))
-//#define MENU_VAL (*(volatile unsigned int *)(0xFFFF0004))
-
-#define VOL_VAL (*(/*volatile*/ std::atomic<unsigned int> *)(0xFFFF0000))
-#define MENU_VAL (*(/*volatile*/ std::atomic<unsigned int> *)(0xFFFF0004))
-#define CRASH_VAL (*(/*volatile*/ std::atomic<unsigned int> *)(0xFFFF0008))
-#define CONSUME_VAL (*(/*volatile*/ std::atomic<unsigned int> *)(0xFFFF000C))
 
 
-//int volume = 5;
-
-//define VOL_VAL (*(volatile unsigned long *)(0xFFFF0000))
-
-
-//#define sev() __asm__("sev")
-//#define ARM1_STARTADR 0xFFFFFFF0
-//#define ARM1_BASEADDR 0x10080000
-//#define COMM_VAL (*(volatile unsigned long *)(0xFFFF0000))
 
 /* ---------------------------------------------------------------------------- *
  * 									main()										*
@@ -64,37 +44,16 @@ unsigned int volume = 5;
  * ---------------------------------------------------------------------------- */
 int main(void)
 {
-	VOL_VAL.store(volume);
-	MENU_VAL.store(0);
-	CRASH_VAL.store(0);
-	CONSUME_VAL.store(0);
 	xil_printf("----------------------------------------\r\n");
 	xil_printf("Entering Main\r\n");
-	//init_platform();
-	//COMM_VAL = 0;
-
-	//Disable cache on OCM
-	// S=b1 TEX=b100 AP=b11, Domain=b1111, C=b0, B=b0
-	//Xil_SetTlbAttributes(0xFFFF0000,0x14de2);
-
-	//print("ARM0: writing startaddress for ARM1\n\r");
-	//Xil_Out32(ARM1_STARTADR, ARM1_BASEADDR);
-	//dmb(); //waits until write has finished
-
-	//print("ARM0: sending the SEV to wake up ARM1\n\r");
-	//sev();
 
 	snake::Init();
-
-	//timer_init();
-
 
 	/* Display interactive menu interface via terminal */
 	finiteStateMachine();
 
 	snake::DeInit();
 
-	//cleanup_platform();
 	return 1;
 } // main()
 
@@ -107,7 +66,6 @@ int main(void)
 void finiteStateMachine(){
 	u8 input = 0x00;
 	u32 location = 0x00000000;
-	u32 location2 = 0x00000000;
 	int cursor_position = 0;
 
 
@@ -127,12 +85,10 @@ void finiteStateMachine(){
 
 				while (currentState == main_menu)
 				{
-					snake::Render(currentState, true, true, false, cursor_position);
 					draw_main_menu(cursor_position);
 					xil_printf("Press 's' to select the currently highlighted option\r\n");
 					xil_printf("Press 'w' to move the cursor up\r\n");
 					xil_printf("Press 'x' to move the cursor down\r\n");
-					xil_printf("Press 'r' to read a random number\r\n");
 					// Wait for input from UART via the terminal
 					input = read_input();
 					switch(input)
@@ -152,11 +108,6 @@ void finiteStateMachine(){
 							move_cursor_down(&cursor_position);
 							break;
 						}
-						case 'r':
-						{
-							RNG_get();
-							break;
-						}
 					}
 				}
 				break;
@@ -167,7 +118,6 @@ void finiteStateMachine(){
 
 				while (currentState == volume_menu)
 				{
-					snake::Render(currentState, true, true, false, cursor_position, volume);
 					draw_volume_menu(cursor_position);
 					xil_printf("Press 's' to select the currently highlighted option\r\n");
 					xil_printf("Press 'w' to move the cursor up\r\n");
@@ -202,7 +152,6 @@ void finiteStateMachine(){
 
 				while (currentState == highscore_menu)
 				{
-					snake::Render(currentState, true, true, false, cursor_position);
 					draw_highscore_menu(cursor_position);
 					xil_printf("Press 's' to select the currently highlighted option\r\n");
 					xil_printf("Press 'w' to move the cursor up\r\n");
@@ -233,14 +182,14 @@ void finiteStateMachine(){
 			}
 			case gameplay:
 			{
+				snake::SetHardMode(false);
+
 				enum direction currentDirection = right;
 				enum direction newDirection = right;
 				draw_grid();
 				initialize_snake();
 				location = RNG_get();
 				spawn_apple(location);
-				location2 = RNG_get();
-				spawn_apple(location2);
 				xil_printf("Press 'w' to set direction = 'up'\r\n");
 				xil_printf("Press 'a' to set direction = 'left'\r\n");
 				xil_printf("Press 'd' to set direction = 'right'\r\n");
@@ -255,14 +204,19 @@ void finiteStateMachine(){
 
 					XTime tStart, tEnd;
 					u64 tElapsed;
+					s64 deltaTimeElapsed;
 
 					XTime_GetTime(&tStart);
 					tElapsed = 0;
 
+					u64 realTimeOut = snake::GetTimeOut(timeout_us);
+
 					while(tElapsed < timeout_us){
 						input = read_input_timeout();
 						XTime_GetTime(&tEnd);
+						deltaTimeElapsed = -tElapsed;
 						tElapsed = (tEnd-tStart) / (COUNTS_PER_SECOND/1000000);
+						deltaTimeElapsed += tElapsed;
 
 						switch(input)
 						{
@@ -313,20 +267,22 @@ void finiteStateMachine(){
 							}
 						}
 
+						if(snake::UpdateTime((u32) deltaTimeElapsed))
+						{
+							// nothing for now. will call to update timer later.
+						}
 					}
 					clear_inputs();
 
 					currentDirection = newDirection;
 					move_snake(currentDirection);
 
-					snake::Render(currentState);
-
 					snake::collision::CollisionFlag collision = snake::collision::DetectCollision();
 
 					if (collision & snake::collision::apple == snake::collision::apple)
 					{
 						xil_printf("Apple Collision\r\n");
-						play_apple_sound_effect();
+						play_sound_effect();
 						consume_apple();
 						update_score();
 						extend_snake();
@@ -337,10 +293,16 @@ void finiteStateMachine(){
 					else if (collision == snake::collision::wall || collision == snake::collision::snake)
 					{
 						xil_printf("Crash Detected\r\n");
-						play_crash_sound_effect();
-						snake::ResetSnakeComponents();
+						play_sound_effect();
 						xil_printf("Storing Score to Memory\r\n");
 						currentState = pre_gameover;
+						snake::Render(currentState, false);
+						snake::UpdateHighScores(snake::GetScore());
+					}
+					else
+					{
+						// very stupid change to fix a dumb bug.
+						snake::Render(currentState);
 					}
 				}
 			}
@@ -355,14 +317,15 @@ void finiteStateMachine(){
 					tElapsed = 0;
 
 					while(tElapsed < gameoverTimeoutUs){
-						input = read_input_timeout();
 						XTime_GetTime(&tEnd);
 						tElapsed = (tEnd-tStart) / (COUNTS_PER_SECOND/1000000);
 					}
 
+					xil_printf("pre game over loop\r\n");
 					snake::Render(gameplay, false, (i & 1) == 0);
 				}
 
+				snake::ResetSnakeComponents();
 				currentState = gameover;
 			}
 			case gameover:
@@ -415,14 +378,9 @@ void finiteStateMachine(){
 	}
 } // menu()
 
-
 u32 RNG_get(){
 	xil_printf("Reading output from pseudo random number generator\r\n");
-	int random_num = *(RNG_BASEADDR_p+0); // Read from register 0
-	xil_printf("Random Number:   %u\r\n", random_num);
-	return random_num;
 
-	/*
 	// to do: integrate with Jake's RNG stuff
 	static u32 index = 0;
 	const u32 randomTable[] =
@@ -445,9 +403,7 @@ u32 RNG_get(){
 			0xA75CA440, 0xDC046933, 0x124A3FFE, 0x22177EC3, 0x1B30FE90, 0xB37B3544, 0xFB4C9FEF, 0x43E97320, 0x2DC39EEE, 0xF7F9670A, 0xF1914098, 0x01B81848, 0x2718BC92, 0xA4FA33BE, 0x6A895E8E, 0xA5B63486,
 	};
 
-
 	return randomTable[ (index++) % 256 ];
-	*/
 }
 void draw_main_menu(int currentIndex){
 	char* arrow0 = "";
@@ -497,13 +453,16 @@ void draw_highscore_menu(int currentIndex){
 	case 5: arrow5  = "<-"; break;
 	}
 
+	u32 highScores[5];
+	snake::GetHighScores(highScores);
+
 	xil_printf("Highscore Menu\r\n");
 	xil_printf("----------------------------------------\r\n");
-	xil_printf("15\r\n");
-	xil_printf("14\r\n");
-	xil_printf("13\r\n");
-	xil_printf("12\r\n");
-	xil_printf("11\r\n");
+	xil_printf("%i\r\n", highScores[0]);
+	xil_printf("%i\r\n", highScores[1]);
+	xil_printf("%i\r\n", highScores[2]);
+	xil_printf("%i\r\n", highScores[3]);
+	xil_printf("%i\r\n", highScores[4]);
 	xil_printf("----------------------------------------\r\n");
 	xil_printf("Options:\r\n");
 	xil_printf("	Return   %s\r\n", arrow5);
@@ -519,10 +478,11 @@ void draw_grid(){
 void initialize_snake(){
 	xil_printf("Drawing initial snake\r\n");
 	snake::InitSnakeComponents();
+	snake::ResetScore();
+	snake::ResetTime();
 }
 void select_option(int currentIndex){
 	xil_printf("Selecting the highlighted option\r\n");
-	MENU_VAL.store(1); //= 1;
 
 	switch(currentIndex)
 		{
@@ -630,14 +590,9 @@ void move_cursor_down(int* currentIndex){
 }
 void increase_volume(){
 	xil_printf("Increasing audio volume\r\n");
-	volume = (volume < 10) ? volume + 1 : volume;
-	VOL_VAL.store(volume);// = volume;
-
 }
 void decrease_volume(){
 	xil_printf("Decreasing audio volume\r\n");
-	volume = (volume > 0) ? volume - 1 : volume;
-	VOL_VAL.store(volume);// = volume;
 }
 void start_game(){
 	xil_printf("Starting gameplay\r\n");
@@ -661,14 +616,8 @@ void draw_gameover_menu(int currentIndex){
 void menu_return(){
 	xil_printf("Returning to main menu\r\n");
 }
-void play_apple_sound_effect(){
-	xil_printf("Triggering apple sound effect\r\n");
-	CONSUME_VAL.store(1);
-
-}
-void play_crash_sound_effect(){
-	xil_printf("Triggering crash sound effect\r\n");
-	CRASH_VAL.store(1);
+void play_sound_effect(){
+	xil_printf("Triggering sound effect\r\n");
 }
 void change_direction(direction* newDirection, direction dir){
 	xil_printf("Snake direction = %s\r\n", getEnum(dir));
@@ -683,6 +632,7 @@ void spawn_apple(u32 location){
 	xil_printf("Drawing apple\r\n");
 	u32 xPos = location & 0x0000000F;
 	u32 yPos = location & 0x000F0000;
+
 	yPos = yPos >> 16;
 
 	if(xPos >= GRID_SIZE)
@@ -708,6 +658,7 @@ void resume_game(){
 }
 void update_score(){
 	xil_printf("Drawing current score\r\n");
+	snake::UpdateScore();
 }
 
 u8 read_input(){
@@ -742,5 +693,3 @@ const char* getEnum(direction e){
       default: return "";
    }
 }
-
-
