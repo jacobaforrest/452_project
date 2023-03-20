@@ -51,6 +51,25 @@ namespace snake
 			return &g_spriteLibrary[spriteIndex];
 		}
 
+		snake::sprites::SpriteIndex getEnumNum(int num){
+			   switch (num)
+			   {
+			      case 0: return snake::sprites::zero;
+			      case 1: return snake::sprites::one;
+			      case 2: return snake::sprites::two;
+			      case 3: return snake::sprites::three;
+			      case 4: return snake::sprites::four;
+			      case 5: return snake::sprites::five;
+			      case 6: return snake::sprites::six;
+			      case 7: return snake::sprites::seven;
+			      case 8: return snake::sprites::eight;
+			      case 9: return snake::sprites::nine;
+			      case 10: return snake::sprites::one;
+			      default: return snake::sprites::zero;
+			   }
+			}
+
+
 		void GetDrawBounds(const Sprite* sprite, s32 xPos, s32 yPos, s32& xStart, s32& xEnd, s32& yStart, s32& yEnd)
 		{
 			const s32 maxWidth = CANVAS_WIDTH - 1;

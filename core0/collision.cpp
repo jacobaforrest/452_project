@@ -2,8 +2,6 @@
 
 #include "snakeHelper.h"
 
-// #define SIMPLE_OVERLAP
-
 namespace snake
 {
 	namespace collision
@@ -31,10 +29,6 @@ namespace snake
 				collision = static_cast<CollisionFlag>(
 						static_cast<CollisionFlag>(collision)
 						| static_cast<CollisionFlag>(apple));
-
-				collision = static_cast<CollisionFlag>(
-						static_cast<CollisionFlag>(collision)
-						| static_cast<CollisionFlag>(bodyApple));
 			}
 
 			if( head->m_xPos < GRID_START_X ||
@@ -76,10 +70,6 @@ namespace snake
 
 		bool Overlap(const OverlapDims& first, const OverlapDims& second)
 		{
-#ifdef SIMPLE_OVERLAP
-			// only works for like-sized objects with discrete grid motion
-			return first.m_xPos == second.m_xPos && first.m_yPos == second.m_yPos;
-#else
 			bool xOverlap = (first.m_xPos <= second.m_xPos && second.m_xPos < (first.m_xPos + first.m_width)) ||
 							(second.m_xPos <= first.m_xPos && first.m_xPos < (second.m_xPos + second.m_width));
 
@@ -87,7 +77,6 @@ namespace snake
 							(second.m_yPos <= first.m_yPos && first.m_yPos < (second.m_yPos + second.m_height));
 
 			return xOverlap && yOverlap;
-#endif
 		}
 	}
 }
