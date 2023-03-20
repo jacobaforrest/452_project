@@ -70,31 +70,13 @@ int main(void)
 	CONSUME_VAL.store(0);
 	xil_printf("----------------------------------------\r\n");
 	xil_printf("Entering Main\r\n");
-	//init_platform();
-	//COMM_VAL = 0;
-
-	//Disable cache on OCM
-	// S=b1 TEX=b100 AP=b11, Domain=b1111, C=b0, B=b0
-	//Xil_SetTlbAttributes(0xFFFF0000,0x14de2);
-
-	//print("ARM0: writing startaddress for ARM1\n\r");
-	//Xil_Out32(ARM1_STARTADR, ARM1_BASEADDR);
-	//dmb(); //waits until write has finished
-
-	//print("ARM0: sending the SEV to wake up ARM1\n\r");
-	//sev();
 
 	snake::Init();
-
-	//timer_init();
-
-
 	/* Display interactive menu interface via terminal */
 	finiteStateMachine();
 
 	snake::DeInit();
 
-	//cleanup_platform();
 	return 1;
 } // main()
 
@@ -233,14 +215,14 @@ void finiteStateMachine(){
 			}
 			case gameplay:
 			{
+				snake::SetHardMode(false);
+
 				enum direction currentDirection = right;
 				enum direction newDirection = right;
 				draw_grid();
 				initialize_snake();
 				location = RNG_get();
 				spawn_apple(location);
-				location2 = RNG_get();
-				spawn_apple(location2);
 				xil_printf("Press 'w' to set direction = 'up'\r\n");
 				xil_printf("Press 'a' to set direction = 'left'\r\n");
 				xil_printf("Press 'd' to set direction = 'right'\r\n");
@@ -255,14 +237,19 @@ void finiteStateMachine(){
 
 					XTime tStart, tEnd;
 					u64 tElapsed;
+					s64 deltaTimeElapsed;
 
 					XTime_GetTime(&tStart);
 					tElapsed = 0;
 
+					u64 realTimeOut = snake::GetTimeOut(timeout_us);
+
 					while(tElapsed < timeout_us){
 						input = read_input_timeout();
 						XTime_GetTime(&tEnd);
+						deltaTimeElapsed = -tElapsed;
 						tElapsed = (tEnd-tStart) / (COUNTS_PER_SECOND/1000000);
+						deltaTimeElapsed += tElapsed;
 
 						switch(input)
 						{
@@ -313,13 +300,15 @@ void finiteStateMachine(){
 							}
 						}
 
+						if(snake::UpdateTime((u32) deltaTimeElapsed))
+						{
+							// nothing for now. will call to update timer later.
+						}
 					}
 					clear_inputs();
 
 					currentDirection = newDirection;
 					move_snake(currentDirection);
-
-					snake::Render(currentState);
 
 					snake::collision::CollisionFlag collision = snake::collision::DetectCollision();
 
@@ -341,6 +330,13 @@ void finiteStateMachine(){
 						snake::ResetSnakeComponents();
 						xil_printf("Storing Score to Memory\r\n");
 						currentState = pre_gameover;
+						snake::Render(currentState, false);
+						snake::UpdateHighScores(snake::GetScore());
+					}
+					else
+					{
+						// very stupid change to fix a dumb bug.
+						snake::Render(currentState);
 					}
 				}
 			}
@@ -360,9 +356,11 @@ void finiteStateMachine(){
 						tElapsed = (tEnd-tStart) / (COUNTS_PER_SECOND/1000000);
 					}
 
+					xil_printf("pre game over loop\r\n");
 					snake::Render(gameplay, false, (i & 1) == 0);
 				}
 
+				snake::ResetSnakeComponents();
 				currentState = gameover;
 			}
 			case gameover:
@@ -497,13 +495,16 @@ void draw_highscore_menu(int currentIndex){
 	case 5: arrow5  = "<-"; break;
 	}
 
+	u32 highScores[5];
+	snake::GetHighScores(highScores);
+
 	xil_printf("Highscore Menu\r\n");
 	xil_printf("----------------------------------------\r\n");
-	xil_printf("15\r\n");
-	xil_printf("14\r\n");
-	xil_printf("13\r\n");
-	xil_printf("12\r\n");
-	xil_printf("11\r\n");
+	xil_printf("%i\r\n", highScores[0]);
+	xil_printf("%i\r\n", highScores[1]);
+	xil_printf("%i\r\n", highScores[2]);
+	xil_printf("%i\r\n", highScores[3]);
+	xil_printf("%i\r\n", highScores[4]);
 	xil_printf("----------------------------------------\r\n");
 	xil_printf("Options:\r\n");
 	xil_printf("	Return   %s\r\n", arrow5);
@@ -519,6 +520,8 @@ void draw_grid(){
 void initialize_snake(){
 	xil_printf("Drawing initial snake\r\n");
 	snake::InitSnakeComponents();
+	snake::ResetScore();
+	snake::ResetTime();
 }
 void select_option(int currentIndex){
 	xil_printf("Selecting the highlighted option\r\n");
@@ -683,6 +686,7 @@ void spawn_apple(u32 location){
 	xil_printf("Drawing apple\r\n");
 	u32 xPos = location & 0x0000000F;
 	u32 yPos = location & 0x000F0000;
+
 	yPos = yPos >> 16;
 
 	if(xPos >= GRID_SIZE)
@@ -708,6 +712,7 @@ void resume_game(){
 }
 void update_score(){
 	xil_printf("Drawing current score\r\n");
+	snake::UpdateScore();
 }
 
 u8 read_input(){
