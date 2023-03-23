@@ -10,6 +10,8 @@
 #include "sprites.h"
 #include "collision.h"
 
+
+
 namespace snake
 {
 	SnakeComponent snakeComponents[GRID_SIZE * GRID_SIZE];
@@ -29,6 +31,8 @@ namespace snake
 	u32 sTime = 0;
 
 	u32 highScores[5] = {200,100,50,20,10};
+
+	//bool paused = false;
 
 	bool hardMode = false;
 
@@ -85,7 +89,7 @@ namespace snake
 		return snakeComponents;
 	}
 
-	void SetApplePosition(u32 xPos, u32 yPos)
+	void SetApplePosition(u32 &xPos, u32 &yPos)
 	{
 		u32 startX = xPos;
 		u32 startY = yPos;
@@ -109,9 +113,179 @@ namespace snake
 			}
 		}
 
+		xPos = appleX;
+		yPos = appleY;
+
 
 		xil_printf("Spawning Apple with coordinates: %i, %i\r\n", appleX, appleY);
 	}
+
+	void MoveApplePosition(u32 &xPos, u32 &yPos, u8 &dir)
+	{
+
+		appleX = xPos;
+		appleY = yPos;
+
+		xil_printf("Apple direction: %i\r\n", dir);
+		xil_printf("xPos: %i\r\n", xPos);
+		xil_printf("yPos: %i\r\n", yPos);
+
+
+
+		if (dir == 0){ // moving right
+			if (appleX >= GRID_SIZE - 1) // apple on the far right
+			{
+				dir = 1; // change direction to begin moving left
+				appleX = GRID_SIZE - 2; // move apple 1 left
+				if ((snake::collision::DetectCollision() & snake::collision::bodyApple) != 0){ // if collision with snake
+					dir = 0; // undo direction change
+					appleX = xPos; // undo apple move
+					//return; // apple stuck between right wall and snake segment
+				}
+				else{ // no collision with snake (update xPos)
+					xPos = appleX;
+				}
+			}
+			else{ // apple not on the far right
+				appleX = xPos + 1; // move apple 1 right
+				if ((snake::collision::DetectCollision() & snake::collision::apple) != 0){ //apple will be consumed next iteration
+					appleX = xPos; // undo apple move
+				}
+				else if ((snake::collision::DetectCollision() & snake::collision::bodyApple) != 0){ // if collision with snake
+					dir = 1; // change direction
+					appleX = xPos - 1; //try moving left
+					if ((snake::collision::DetectCollision() & snake::collision::bodyApple) != 0 // if collision with snake
+							|| (xPos <= 0)){ // if collision with wall
+						dir = 0; // change direction
+						appleX = xPos; // undo apple move
+						//return; // apple stuck between snake segments or left wall and snake segment
+					}
+					else{
+						xPos = appleX;
+					}
+				}
+				else{ // no collision with snake (update xPos)
+					xPos = appleX;
+				}
+			}
+		}
+
+		else if (dir == 1){ // moving left
+			if (appleX == 0) // apple on the far left
+			{
+				dir = 0; // change direction to begin moving right
+				appleX = 1; // move apple 1 right
+				if ((snake::collision::DetectCollision() & snake::collision::bodyApple) != 0){ // if collision with snake
+					dir = 1; // undo change direction
+					appleX = xPos; // undo apple
+					//return; // apple stuck between left wall and snake segment
+				}
+				else{ // no collision with snake (update xPos)
+					xPos = appleX;
+				}
+			}
+			else{ // apple not on the far left
+				appleX = xPos - 1; // move apple 1 left
+				if ((snake::collision::DetectCollision() & snake::collision::apple) != 0){ //apple will be consumed next iteration
+					appleX = xPos; // undo apple move
+				}
+				else if ((snake::collision::DetectCollision() & snake::collision::bodyApple) != 0){ // if collision with snake
+					dir = 0; // change direction
+					appleX = xPos + 1; //try moving right
+					if ((snake::collision::DetectCollision() & snake::collision::bodyApple) != 0 // if collision with snake
+							|| (appleX >= GRID_SIZE - 1)){ // if collision with wall
+						dir = 1; // change direction
+						appleX = xPos; // undo apple move
+						//return; // apple stuck between snake segments or right wall and snake segment
+					}
+					else{
+						xPos = appleX;
+					}
+				}
+				else{ // no collision with snake (update xPos)
+					xPos = appleX;
+				}
+			}
+		}
+		else if (dir == 2){ // moving up
+			if (appleY == 0) // apple on the far top
+			{
+				dir = 3; // change direction to begin moving down
+				appleY = 1; // move apple 1 down
+				if ((snake::collision::DetectCollision() & snake::collision::bodyApple) != 0){ // if collision with snake
+					dir = 2; // undo direction change
+					appleY = yPos; // undo apple move
+					//return; // apple stuck between top wall and snake segment
+				}
+				else{ // no collision with snake (update yPos)
+					yPos = appleY;
+				}
+			}
+			else{ // apple not on the far top
+				appleY = yPos - 1; // move apple 1 up
+				if ((snake::collision::DetectCollision() & snake::collision::apple) != 0){ //apple will be consumed next iteration
+					appleY = yPos; // undo apple move
+				}
+				else if ((snake::collision::DetectCollision() & snake::collision::bodyApple) != 0){ // if collision with snake
+					dir = 3; // change direction
+					appleY = yPos + 1; //try moving down
+					if ((snake::collision::DetectCollision() & snake::collision::bodyApple) != 0 // if collision with snake
+							|| (appleY >= GRID_SIZE - 1)){ // if collision with wall
+						dir = 2; // change direction
+						appleY = yPos; // undo apple move
+						//return; // apple stuck between snake segments or bottom wall and snake segment
+					}
+					else{
+						yPos = appleY;
+					}
+				}
+				else{ // no collision with snake (update yPos)
+					yPos = appleY;
+				}
+			}
+		}
+
+		else if (dir == 3){ // moving down
+			if (appleY == GRID_SIZE - 1) // apple on the far bottom
+			{
+				dir = 2; // change direction to begin moving up
+				appleY = GRID_SIZE - 2; // move apple 1 up
+				if ((snake::collision::DetectCollision() & snake::collision::bodyApple) != 0){ // if collision with snake
+					dir = 3; // undo change direction
+					appleY = yPos; // undo apple
+					//return; // apple stuck between left wall and snake segment
+				}
+				else{ // no collision with snake (update yPos)
+					yPos = appleY;
+				}
+			}
+			else{ // apple not on the far bottom
+				appleY = yPos + 1; // move apple 1 down
+				if ((snake::collision::DetectCollision() & snake::collision::apple) != 0){ //apple will be consumed next iteration
+					appleY = yPos; // undo apple move
+				}
+				else if ((snake::collision::DetectCollision() & snake::collision::bodyApple) != 0){ // if collision with snake
+					dir = 2; // change direction
+					appleY = yPos - 1; //try moving up
+					if ((snake::collision::DetectCollision() & snake::collision::bodyApple) != 0 // if collision with snake
+							|| (yPos <= 0)){ // if collision with wall
+						dir = 3; // change direction
+						appleY = yPos; // undo apple move
+						//return; // apple stuck between snake segments or right wall and snake segment
+					}
+					else{
+						yPos = appleY;
+					}
+				}
+				else{ // no collision with snake (update yPos)
+					yPos = appleY;
+				}
+			}
+		}
+
+		xil_printf("Spawning Apple with coordinates: %i, %i\r\n", appleX, appleY);
+	}
+
 
 	void GetApplePosition(u32& outX, u32& outY)
 	{
@@ -139,7 +313,7 @@ namespace snake
 		}
 	}
 
-	void Render(state gameState, bool showHead, bool renderSnake, bool highScore, int cursorPosition, int volume)
+	void Render(state gameState, bool showHead, bool renderSnake, bool highScore, int cursorPosition, int volume, bool moving_apple)
 	{
 		switch(gameState)
 		{
@@ -193,12 +367,20 @@ namespace snake
 					224
 				);
 
+				// OPTIONS
+				snake::render::PaintToCanvas(
+					snake::render::GetCanvas(),
+					snake::render::GetSprite(snake::sprites::OPTIONS),
+					213,
+					288
+				);
+
 				// START
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::START),
 					213,
-					288
+					352
 				);
 
 				// ARROW
@@ -225,6 +407,16 @@ namespace snake
 						break;
 					}
 					case 2: // PLAY GAME
+					{
+						snake::render::PaintToCanvas(
+							snake::render::GetCanvas(),
+							snake::render::GetSprite(snake::sprites::arrow),
+							128,
+							352
+						);
+						break;
+					}
+					case 6: //OPTIONS
 					{
 						snake::render::PaintToCanvas(
 							snake::render::GetCanvas(),
@@ -458,6 +650,84 @@ namespace snake
 
 				break;
 			}
+			case options_menu:
+			{
+				snake::render::ClearCanvas(snake::render::GetCanvas());
+
+				// Snake
+				snake::render::PaintToCanvas(
+					snake::render::GetCanvas(),
+					snake::render::GetSprite(snake::sprites::Snake),
+					213,
+					96
+				);
+
+
+				// ROAMING
+				snake::render::PaintToCanvas(
+					snake::render::GetCanvas(),
+					snake::render::GetSprite(snake::sprites::ROAMING),
+					213,
+					160
+				);
+
+				if (moving_apple){
+					snake::render::PaintToCanvas(
+						snake::render::GetCanvas(),
+						snake::render::GetSprite(snake::sprites::one),
+						452,
+						160
+					);
+				}
+				else{
+					snake::render::PaintToCanvas(
+						snake::render::GetCanvas(),
+						snake::render::GetSprite(snake::sprites::zero),
+						452,
+						160
+					);
+				}
+
+
+				// RETURN
+				snake::render::PaintToCanvas(
+					snake::render::GetCanvas(),
+					snake::render::GetSprite(snake::sprites::RETURN),
+					213,
+					224
+				);
+
+				// ARROW
+				switch(cursorPosition)
+				{
+					case 7: //TOGGLE ROAMING
+					{
+						snake::render::PaintToCanvas(
+							snake::render::GetCanvas(),
+							snake::render::GetSprite(snake::sprites::arrow),
+							128,
+							160
+						);
+						break;
+					}
+					case 5: // RETURN
+					{
+						snake::render::PaintToCanvas(
+							snake::render::GetCanvas(),
+							snake::render::GetSprite(snake::sprites::arrow),
+							128,
+							224
+						);
+						break;
+					}
+					default:
+					{
+						break;
+					}
+				}
+
+				break;
+			}
 			case pre_gameover:
 			case gameplay:
 			{
@@ -595,6 +865,8 @@ namespace snake
 						);
 					}
 				}
+
+
 
 				// draw apple
 				snake::render::PaintToCanvas(
@@ -769,6 +1041,10 @@ namespace snake
 			}
 		}
 	}
+
+	//void toggle_pause(){
+	//	paused = paused ^ 0x1;
+	//}
 
 	void UpdateScore()
 	{
