@@ -75,7 +75,14 @@ namespace snake
 		snakeComponents[0].m_direction = East;
 		snakeComponents[0].m_init = true;
 
-		nextBody = 1;
+		snakeComponents[1].m_xPos = SNAKE_START_X - 32;
+		snakeComponents[1].m_yPos = SNAKE_START_Y;
+		snakeComponents[1].m_direction = East;
+		snakeComponents[1].m_init = true;
+
+		snakeComponents[0].m_next = &snakeComponents[1];
+
+		nextBody = 2;
 	}
 
 	void ResetSnakeComponents()
@@ -84,6 +91,11 @@ namespace snake
 		{
 			snakeComponents[i].m_init = false;
 		}
+	}
+
+	int GetComponentCount()
+	{
+		return nextBody;
 	}
 
 	SnakeComponent* GetHead()
@@ -315,7 +327,7 @@ namespace snake
 		}
 	}
 
-	void Render(state gameState, bool showHead, bool renderSnake, bool highScore, int cursorPosition, int volume, bool moving_apple)
+	void Render(state gameState, bool showHead, bool renderSnake, bool highScore, int cursorPosition, int volume, bool moving_apple, int explosionIndex)
 	{
 		switch(gameState)
 		{
@@ -327,7 +339,7 @@ namespace snake
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::Snake),
-					213,
+					213 - 64,
 					96
 				);
 
@@ -336,14 +348,14 @@ namespace snake
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::ADJUST),
-					213,
+					213 - 64,
 					160
 				);
 
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::VOLUME),
-					373,
+					373 - 64,
 					160
 				);
 
@@ -351,21 +363,21 @@ namespace snake
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::VIEW),
-					213,
+					213 - 64,
 					224
 				);
 
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::HIGH),
-					335,
+					335 - 64,
 					224
 				);
 
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::SCORES),
-					449,
+					449 - 64,
 					224
 				);
 
@@ -373,7 +385,7 @@ namespace snake
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::OPTIONS),
-					213,
+					213 - 64,
 					288
 				);
 
@@ -381,7 +393,7 @@ namespace snake
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::START),
-					213,
+					213 - 64,
 					352
 				);
 
@@ -393,7 +405,7 @@ namespace snake
 						snake::render::PaintToCanvas(
 							snake::render::GetCanvas(),
 							snake::render::GetSprite(snake::sprites::arrow),
-							128,
+							128 - 64,
 							160
 						);
 						break;
@@ -403,7 +415,7 @@ namespace snake
 						snake::render::PaintToCanvas(
 							snake::render::GetCanvas(),
 							snake::render::GetSprite(snake::sprites::arrow),
-							128,
+							128 - 64,
 							224
 						);
 						break;
@@ -413,7 +425,7 @@ namespace snake
 						snake::render::PaintToCanvas(
 							snake::render::GetCanvas(),
 							snake::render::GetSprite(snake::sprites::arrow),
-							128,
+							128 - 64,
 							352
 						);
 						break;
@@ -423,7 +435,7 @@ namespace snake
 						snake::render::PaintToCanvas(
 							snake::render::GetCanvas(),
 							snake::render::GetSprite(snake::sprites::arrow),
-							128,
+							128 - 64,
 							288
 						);
 						break;
@@ -444,7 +456,7 @@ namespace snake
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::Snake),
-					213,
+					213 - 64,
 					96
 				);
 
@@ -452,7 +464,7 @@ namespace snake
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::render::getEnumNum(volume)),
-					213,
+					213 - 64,
 					160
 				);
 				if (volume == 10)
@@ -460,7 +472,7 @@ namespace snake
 					snake::render::PaintToCanvas(
 						snake::render::GetCanvas(),
 						snake::render::GetSprite(snake::render::getEnumNum(0)),
-						239,
+						239 - 64,
 						160
 					);
 				}
@@ -470,14 +482,14 @@ namespace snake
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::INCREASE),
-					213,
+					213 - 64,
 					224
 				);
 
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::VOLUME),
-					420,
+					420 - 64,
 					224
 				);
 
@@ -485,14 +497,14 @@ namespace snake
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::DECREASE),
-					213,
+					213 - 64,
 					288
 				);
 
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::VOLUME),
-					420,
+					420 - 64,
 					288
 				);
 
@@ -500,7 +512,7 @@ namespace snake
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::RETURN),
-					213,
+					213 - 64,
 					352
 				);
 
@@ -512,7 +524,7 @@ namespace snake
 						snake::render::PaintToCanvas(
 							snake::render::GetCanvas(),
 							snake::render::GetSprite(snake::sprites::arrow),
-							128,
+							128 - 64,
 							224
 						);
 						break;
@@ -522,7 +534,7 @@ namespace snake
 						snake::render::PaintToCanvas(
 							snake::render::GetCanvas(),
 							snake::render::GetSprite(snake::sprites::arrow),
-							128,
+							128 - 64,
 							288
 						);
 						break;
@@ -532,7 +544,7 @@ namespace snake
 						snake::render::PaintToCanvas(
 							snake::render::GetCanvas(),
 							snake::render::GetSprite(snake::sprites::arrow),
-							128,
+							128 - 64,
 							352
 						);
 						break;
@@ -553,7 +565,7 @@ namespace snake
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::Snake),
-					213,
+					213 - 64,
 					32
 				);
 
@@ -564,7 +576,7 @@ namespace snake
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::I),
-					213,
+					213 - 64,
 					96
 				);
 
@@ -574,7 +586,7 @@ namespace snake
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::II),
-					213,
+					213 - 64,
 					160
 				);
 
@@ -584,24 +596,17 @@ namespace snake
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::III),
-					213,
+					213 - 64,
 					224
 				);
 
 				PrintScore(highScores[2], 301, 224, false);
 
-				snake::render::PaintToCanvas(
-					snake::render::GetCanvas(),
-					snake::render::GetSprite(snake::sprites::seven),
-					341,
-					224
-				);
-
 				// IV
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::IV),
-					213,
+					213 - 64,
 					288
 				);
 
@@ -611,14 +616,7 @@ namespace snake
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::V),
-					213,
-					352
-				);
-
-					snake::render::PaintToCanvas(
-					snake::render::GetCanvas(),
-					snake::render::GetSprite(snake::sprites::five),
-					341,
+					213 - 64,
 					352
 				);
 
@@ -628,7 +626,7 @@ namespace snake
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::RETURN),
-					213,
+					213 - 64,
 					416
 				);
 
@@ -637,86 +635,12 @@ namespace snake
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::arrow),
-					128,
+					128 - 64,
 					416
 				);
-snake::render::ClearCanvas(snake::render::GetCanvas());
-
-				// Snake
-				snake::render::PaintToCanvas(
-					snake::render::GetCanvas(),
-					snake::render::GetSprite(snake::sprites::Snake),
-					213,
-					96
-				);
-
-
-				// ROAMING
-				snake::render::PaintToCanvas(
-					snake::render::GetCanvas(),
-					snake::render::GetSprite(snake::sprites::ROAMING),
-					213,
-					160
-				);
-
-				if (moving_apple){
-					snake::render::PaintToCanvas(
-						snake::render::GetCanvas(),
-						snake::render::GetSprite(snake::sprites::one),
-						452,
-						160
-					);
-				}
-				else{
-					snake::render::PaintToCanvas(
-						snake::render::GetCanvas(),
-						snake::render::GetSprite(snake::sprites::zero),
-						452,
-						160
-					);
-				}
-
-
-				// RETURN
-				snake::render::PaintToCanvas(
-					snake::render::GetCanvas(),
-					snake::render::GetSprite(snake::sprites::RETURN),
-					213,
-					224
-				);
-
-				// ARROW
-				switch(cursorPosition)
-				{
-					case 7: //TOGGLE ROAMING
-					{
-						snake::render::PaintToCanvas(
-							snake::render::GetCanvas(),
-							snake::render::GetSprite(snake::sprites::arrow),
-							128,
-							160
-						);
-						break;
-					}
-					case 5: // RETURN
-					{
-						snake::render::PaintToCanvas(
-							snake::render::GetCanvas(),
-							snake::render::GetSprite(snake::sprites::arrow),
-							128,
-							224
-						);
-						break;
-					}
-					default:
-					{
-						break;
-					}
-				}
 
 				break;
 			}
-			case pre_gameover:
 			case gameplay:
 			{
 				snake::render::DrawBackground(snake::render::GetCanvas(), background);
@@ -934,6 +858,272 @@ snake::render::ClearCanvas(snake::render::GetCanvas());
 
 				break;
 			}
+
+			case pre_gameover:
+			{
+				snake::render::DrawBackground(snake::render::GetCanvas(), background);
+
+				PrintTime(GetTime(), 32, 8);
+				PrintScore(GetScore(), 288, 8);
+
+				// snake head
+				snake::render::Sprite* headN;
+				snake::render::Sprite* headW;
+				snake::render::Sprite* headS;
+				snake::render::Sprite* headE;
+
+				// going east.
+				snake::render::Sprite* lEW;
+				snake::render::Sprite* dEW;
+
+				// going north
+				snake::render::Sprite* lSN;
+				snake::render::Sprite* dSN;
+
+				// <from direction> <to direction>
+				snake::render::Sprite* lNE;
+				snake::render::Sprite* lWN;
+				snake::render::Sprite* lSW;
+				snake::render::Sprite* lES;
+
+				snake::render::Sprite* dNE;
+				snake::render::Sprite* dWN;
+				snake::render::Sprite* dSW;
+				snake::render::Sprite* dES;
+
+				snake::render::Sprite* taillN;
+				snake::render::Sprite* taillW;
+				snake::render::Sprite* taillS;
+				snake::render::Sprite* taillE;
+
+				snake::render::Sprite* taildN;
+				snake::render::Sprite* taildW;
+				snake::render::Sprite* taildS;
+				snake::render::Sprite* taildE;
+
+
+
+				GetSnakeSprite(
+					false,
+
+					headN,
+					headW,
+					headS,
+					headE,
+
+					lEW,
+					dEW,
+
+					lSN,
+					dSN,
+
+					lNE,
+					lWN,
+					lSW,
+					lES,
+
+					dNE,
+					dWN,
+					dSW,
+					dES,
+
+					taillN,
+					taillW,
+					taillS,
+					taillE,
+
+					taildN,
+					taildW,
+					taildS,
+					taildE
+				);
+
+				snake::render::Sprite* explosion1 = snake::render::GetSprite(snake::sprites::explosion1);
+				snake::render::Sprite* explosion2 = snake::render::GetSprite(snake::sprites::explosion2);
+				snake::render::Sprite* explosion3 = snake::render::GetSprite(snake::sprites::explosion3);
+				snake::render::Sprite* explosion4 = snake::render::GetSprite(snake::sprites::bg);
+
+				switch(explosionIndex)
+				{
+				case 0:
+				{
+					snake::render::PaintToCanvas(
+						snake::render::GetCanvas(),
+						explosion1,
+						snakeComponents[0].m_xPos,
+						snakeComponents[0].m_yPos
+					);
+					break;
+				}
+				case 1:
+				{
+					snake::render::PaintToCanvas(
+						snake::render::GetCanvas(),
+						explosion2,
+						snakeComponents[0].m_xPos,
+						snakeComponents[0].m_yPos
+					);
+					break;
+				}
+				case 2:
+				{
+					snake::render::PaintToCanvas(
+						snake::render::GetCanvas(),
+						explosion3,
+						snakeComponents[0].m_xPos,
+						snakeComponents[0].m_yPos
+					);
+					break;
+				}
+				default:
+					break;
+				}
+
+				// snake body
+				int index = 1;
+
+				if(renderSnake)
+				{
+					while(snakeComponents[index].m_init && snakeComponents[index + 1].m_init)
+					{
+						if(explosionIndex - index < 0)
+						{
+							if((index & 1) == 0)
+							{
+								AltDrawDirectionfulSnakeComponent(snakeComponents[index - 1].m_direction, snakeComponents[index].m_direction,
+										snakeComponents[index].m_xPos, snakeComponents[index].m_yPos,
+										lSN, lWN, lNE,
+										lEW, lNE, lES,
+										lSN, lSW, lES,
+										lEW, lWN, lSW
+									);
+							}
+							else // dark
+							{
+								AltDrawDirectionfulSnakeComponent(snakeComponents[index - 1].m_direction, snakeComponents[index].m_direction,
+										snakeComponents[index].m_xPos, snakeComponents[index].m_yPos,
+										dSN, dWN, dNE,
+										dEW, dNE, dES,
+										dSN, dSW, dES,
+										dEW, dWN, dSW
+									);
+							}
+						}
+						else if(explosionIndex - index == 0)
+						{
+							snake::render::PaintToCanvas(
+								snake::render::GetCanvas(),
+								explosion1,
+								snakeComponents[index].m_xPos,
+								snakeComponents[index].m_yPos
+							);
+						}
+						else if(explosionIndex - index == 1)
+						{
+							snake::render::PaintToCanvas(
+								snake::render::GetCanvas(),
+								explosion2,
+								snakeComponents[index].m_xPos,
+								snakeComponents[index].m_yPos
+							);
+						}
+						else if(explosionIndex - index == 2)
+						{
+							snake::render::PaintToCanvas(
+								snake::render::GetCanvas(),
+								explosion3,
+								snakeComponents[index].m_xPos,
+								snakeComponents[index].m_yPos
+							);
+						}
+
+						++index;
+					}
+
+					if(explosionIndex - index < 0)
+					{
+						// snake tail
+						if(snakeComponents[index].m_init)
+						{
+							snake::render::Sprite* tail = NULL;
+
+							if((index & 1) == 0)
+							{
+								switch(snakeComponents[index - 1].m_direction)
+								{
+									case North:
+									tail = taillN;
+									break;
+									case South:
+									tail = taillS;
+									break;
+									case East:
+									tail = taillE;
+									break;
+									case West:
+									tail = taillW;
+									default:
+									break;
+								}
+							}
+							else
+							{
+								switch(snakeComponents[index - 1].m_direction)
+								{
+									case North:
+									tail = taildN;
+									break;
+									case South:
+									tail = taildS;
+									break;
+									case East:
+									tail = taildE;
+									break;
+									case West:
+									tail = taildW;
+									default:
+									break;
+								}
+							}
+
+							snake::render::PaintToCanvas(
+								snake::render::GetCanvas(),
+								tail,
+								snakeComponents[index].m_xPos,
+								snakeComponents[index].m_yPos
+							);
+						}
+					}
+					else if(explosionIndex - index == 0)
+					{
+						snake::render::PaintToCanvas(
+							snake::render::GetCanvas(),
+							explosion1,
+							snakeComponents[index].m_xPos,
+							snakeComponents[index].m_yPos
+						);
+					}
+					else if(explosionIndex - index == 1)
+					{
+						snake::render::PaintToCanvas(
+							snake::render::GetCanvas(),
+							explosion2,
+							snakeComponents[index].m_xPos,
+							snakeComponents[index].m_yPos
+						);
+					}
+					else if(explosionIndex - index == 2)
+					{
+						snake::render::PaintToCanvas(
+							snake::render::GetCanvas(),
+							explosion3,
+							snakeComponents[index].m_xPos,
+							snakeComponents[index].m_yPos
+						);
+					}
+				}
+				break;
+			}
 			case gameover:
 			{
 				snake::render::ClearCanvas(snake::render::GetCanvas());
@@ -971,6 +1161,251 @@ snake::render::ClearCanvas(snake::render::GetCanvas());
 				PrintScore(GetScore(), 192, 8);
 
 				break;
+			}
+			case options_menu:
+			{
+				snake::render::ClearCanvas(snake::render::GetCanvas());
+
+
+				// Snake
+				snake::render::PaintToCanvas(
+					snake::render::GetCanvas(),
+					snake::render::GetSprite(snake::sprites::Snake),
+					149,
+					96
+				);
+
+				// Roaming
+				snake::render::PaintToCanvas(
+					snake::render::GetCanvas(),
+					snake::render::GetSprite(snake::sprites::ROAMING),
+					149,
+					160
+				);
+
+				if (moving_apple){
+					snake::render::PaintToCanvas(
+						snake::render::GetCanvas(),
+						snake::render::GetSprite(snake::sprites::ON),
+						500,
+						160
+					);
+				}
+				else{
+					snake::render::PaintToCanvas(
+						snake::render::GetCanvas(),
+						snake::render::GetSprite(snake::sprites::OFF),
+						500,
+						160
+					);
+				}
+
+				// Hard mode
+				snake::render::PaintToCanvas(
+					snake::render::GetCanvas(),
+					snake::render::GetSprite(snake::sprites::HARDMODE),
+					149,
+					224
+				);
+
+				if (hardMode){
+					snake::render::PaintToCanvas(
+						snake::render::GetCanvas(),
+						snake::render::GetSprite(snake::sprites::ON),
+						500,
+						224
+					);
+				}
+				else{
+					snake::render::PaintToCanvas(
+						snake::render::GetCanvas(),
+						snake::render::GetSprite(snake::sprites::OFF),
+						500,
+						224
+					);
+				}
+
+				// Snake color
+				snake::render::PaintToCanvas(
+					snake::render::GetCanvas(),
+					snake::render::GetSprite(snake::sprites::SNAKECOLOUR),
+					149,
+					288
+				);
+
+
+				snake::render::Sprite* headN;
+				snake::render::Sprite* headW;
+				snake::render::Sprite* headS;
+				snake::render::Sprite* headE;
+
+				snake::render::Sprite* lEW;
+				snake::render::Sprite* dEW;
+
+				snake::render::Sprite* lSN;
+				snake::render::Sprite* dSN;
+
+				snake::render::Sprite* lNE;
+				snake::render::Sprite* lWN;
+				snake::render::Sprite* lSW;
+				snake::render::Sprite* lES;
+
+				snake::render::Sprite* dNE;
+				snake::render::Sprite* dWN;
+				snake::render::Sprite* dSW;
+				snake::render::Sprite* dES;
+
+				snake::render::Sprite* taillN;
+				snake::render::Sprite* taillW;
+				snake::render::Sprite* taillS;
+				snake::render::Sprite* taillE;
+
+				snake::render::Sprite* taildN;
+				snake::render::Sprite* taildW;
+				snake::render::Sprite* taildS;
+				snake::render::Sprite* taildE;
+
+				snake::GetSnakeSprite(
+					false,
+
+					headN,
+					headW,
+					headS,
+					headE,
+
+					lEW,
+					dEW,
+
+					lSN,
+					dSN,
+
+					lNE,
+					lWN,
+					lSW,
+					lES,
+
+					dNE,
+					dWN,
+					dSW,
+					dES,
+
+					taillN,
+					taillW,
+					taillS,
+					taillE,
+
+					taildN,
+					taildW,
+					taildS,
+					taildE
+				);
+
+				snake::render::PaintToCanvas(
+					snake::render::GetCanvas(),
+					headW,
+					468,
+					288
+				);
+
+				snake::render::PaintToCanvas(
+					snake::render::GetCanvas(),
+					dEW,
+					500,
+					288
+				);
+
+				snake::render::PaintToCanvas(
+					snake::render::GetCanvas(),
+					taillW,
+					532,
+					288
+				);
+
+
+				// Food Sprites
+				snake::render::PaintToCanvas(
+					snake::render::GetCanvas(),
+					snake::render::GetSprite(snake::sprites::FOOD),
+					149,
+					352
+				);
+
+				snake::render::Sprite* foodSprite;
+				snake::GetFoodSprite(foodSprite);
+
+				snake::render::PaintToCanvas(
+					snake::render::GetCanvas(),
+					foodSprite,
+					500,
+					352
+				);
+
+				// Return
+				snake::render::PaintToCanvas(
+					snake::render::GetCanvas(),
+					snake::render::GetSprite(snake::sprites::RETURN),
+					149,
+					416
+				);
+
+				// ARROW
+				switch(cursorPosition)
+				{
+					case 7: // ADJUST VOLUME
+					{
+						snake::render::PaintToCanvas(
+							snake::render::GetCanvas(),
+							snake::render::GetSprite(snake::sprites::arrow),
+							64,
+							160
+						);
+						break;
+					}
+					case 8: // HIGHSCORE
+					{
+						snake::render::PaintToCanvas(
+							snake::render::GetCanvas(),
+							snake::render::GetSprite(snake::sprites::arrow),
+							64,
+							224
+						);
+						break;
+					}
+					case 9: // PLAY GAME
+					{
+						snake::render::PaintToCanvas(
+							snake::render::GetCanvas(),
+							snake::render::GetSprite(snake::sprites::arrow),
+							64,
+							288
+						);
+						break;
+					}
+					case 10: //OPTIONS
+					{
+						snake::render::PaintToCanvas(
+							snake::render::GetCanvas(),
+							snake::render::GetSprite(snake::sprites::arrow),
+							64,
+							352
+						);
+						break;
+					}
+					case 5: //OPTIONS
+					{
+						snake::render::PaintToCanvas(
+							snake::render::GetCanvas(),
+							snake::render::GetSprite(snake::sprites::arrow),
+							64,
+							416
+						);
+						break;
+					}
+					default:
+					{
+						break;
+					}
+				}
 			}
 			default:
 			{

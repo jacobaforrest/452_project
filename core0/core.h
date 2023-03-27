@@ -42,7 +42,6 @@ void draw_main_menu(int currentIndex);
 void draw_volume_menu(int currentIndex);
 void draw_highscore_menu(int currentIndex);
 void draw_options_menu(int currentIndex);
-void draw_options_menu(int currentIndex, int sideDirection);
 void draw_grid();
 void initialize_snake();
 void select_option(int currentIndex);
@@ -64,7 +63,7 @@ void pause_game();
 void resume_game();
 void update_score();
 void clear_inputs();
-void query_input(u8 input, direction& currentDirection, direction& newDirection, XTime& tStart, XTime& tEnd, XTime& tPausedStart, XTime& tPausedEnd, XTime& tPauseElapsed);
+void query_input(u8 input, direction& currentDirection, direction& newDirection, XTime& tStart, XTime& tEnd, XTime& tPausedStart, XTime& tPausedEnd, XTime& tPauseElapsed, bool readInput = true);
 void moveApple(u32 &pos, u8 &dir);
 
 

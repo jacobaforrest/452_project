@@ -75,6 +75,8 @@ namespace snake
 	void InitSnakeComponents();
 	void ResetSnakeComponents();
 
+	int GetComponentCount();
+
 	SnakeComponent* GetHead();
 
 	void SetApplePosition(u32 &xPos, u32 &yPos);
@@ -83,7 +85,7 @@ namespace snake
 
 	void GetGameplayBackground(u32* background);
 
-	void Render(state gameState, bool showHead = true, bool renderSnake = true, bool highScore = false, int cursorPosition = 0, int volume = 5, bool moving_snake = 0);
+	void Render(state gameState, bool showHead = true, bool renderSnake = true, bool highScore = false, int cursorPosition = 0, int volume = 5, bool moving_apple = 0, int explosionIndex = 0);
 
 	void AltRender(SnakeDirection direction, bool showHead = true, bool renderSnake = true, bool highScore = false);
 

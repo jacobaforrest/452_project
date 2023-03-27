@@ -24,19 +24,21 @@ enum state currentState = main_menu;
 
 const char* options[] =
 {
-	"Adjust Volume", // Main Menu
-	"View Highscores", // Main Menu
-	"Play Game", // Main Menu
-	"Increase Volume", // Volume Menu
-	"Decrease Volume", // Volume Menu
-	"Return" // Volume Menu, Highscore Menu, Gameover Menu, Options Menu
-	"Options" // Main Menu
-	"Roaming" // Options Menu
-
+	"Adjust Volume", // Main Menu											0
+	"View Highscores", // Main Menu											1
+	"Play Game", // Main Menu												2
+	"Increase Volume", // Volume Menu										3
+	"Decrease Volume", // Volume Menu										4
+	"Return", // Volume Menu, Highscore Menu, Gameover Menu, Options Menu	5
+	"Options", // Main Menu													6
+	"Roaming", // Options Menu												7
+	"Hard Mode", // Hard Mode												8
+	"Snake Color", // Options Menu											9
+	"Food Sprite" // Options Menu											10
 };
 
 u64 timeout_us = 400000 / 2;
-u64 gameoverTimeoutUs = 250000;
+u64 gameoverTimeoutUs = 20000;
 u64 mini_timeout_us = 2000;
 int tempMovementCounter = 0;
 Xuint32 *RNG_BASEADDR_p = (Xuint32 *)(XPAR_RNG_0_S00_AXI_BASEADDR); //output stored in register 0
@@ -260,9 +262,7 @@ void finiteStateMachine()
 			case gameplay:
 			{
 				u32 curLoop = 0;
-				snake::SetHardMode(false);
 
-				snake::SetHardMode(false);
 				enum direction currentDirection = right;
 				enum direction newDirection = right;
 				draw_grid();
@@ -291,7 +291,6 @@ void finiteStateMachine()
 
 					u64 realTimeOut = snake::GetTimeOut(timeout_us);
 
-					query_input(input, currentDirection, newDirection, tStart, tEnd, tPausedStart, tPausedEnd, tPauseElapsed);
 					while(tElapsed < realTimeOut)
 					{
 						input = read_input_timeout();
@@ -317,7 +316,6 @@ void finiteStateMachine()
 					clear_inputs();
 					while(tElapsed < realTimeOut)
 					{
-						input = read_input_timeout();
 						XTime_GetTime(&tEnd);
 						deltaTimeElapsed = -tElapsed;
 						tElapsed = (tEnd-tStart) / (COUNTS_PER_SECOND/1000000);
@@ -393,7 +391,9 @@ void finiteStateMachine()
 			}
 			case pre_gameover:
 			{
-				for(int i = 0; i < 10; ++i)
+				int explosionCount = snake::GetComponentCount() + 4;
+
+				for(int i = 0; i < explosionCount; ++i)
 				{
 					XTime tStart, tEnd;
 					u64 tElapsed;
@@ -408,7 +408,7 @@ void finiteStateMachine()
 					}
 
 					xil_printf("pre game over loop\r\n");
-					snake::Render(gameplay, false, (i & 1) == 0);
+					snake::Render(pre_gameover, false, true, false, 0, 5, 0, i);
 				}
 
 				snake::ResetSnakeComponents();
@@ -518,19 +518,26 @@ void draw_volume_menu(int currentIndex){
 void draw_options_menu(int currentIndex){
 	char* arrow7 = "";
 	char* arrow5 = "";
+	char* arrow8 = "";
+	char* arrow9 = "";
+	char* arrow10 = "";
 
 	switch(currentIndex){
 	case 7: arrow7 = "<-"; break;
 	case 5: arrow5 = "<-"; break;
+	case 8: arrow8 = "<-"; break;
+	case 9: arrow9 = "<-"; break;
+	case 10: arrow10 = "<-"; break;
 	}
 
-	xil_printf("Options\r\n");
+	xil_printf("Options Menu\r\n");
 	xil_printf("----------------------------------------\r\n");
-	xil_printf("Options:\r\n");
 	xil_printf("	Roaming            %s\r\n", arrow7);
-	xil_printf("	Return            %s\r\n", arrow5);
+	xil_printf("	Hard Mode: %s    %s\r\n",   arrow8); // hard mode
+	xil_printf("	Snake Color: %s  %s\r\n", arrow9); // color
+	xil_printf("	Food Sprite: %s  %s\r\n", arrow10); // food
+	xil_printf("	Return   %s\r\n", arrow5); // return
 	xil_printf("\r\n");
-
 }
 void draw_highscore_menu(int currentIndex){
 	char* arrow5 = "";
@@ -556,59 +563,6 @@ void draw_highscore_menu(int currentIndex){
 
 }
 
-void draw_options_menu(int currentIndex, int sideDirection)
-{
-	char* arrow1 = "";
-	char* arrow2 = "";
-	char* arrow3 = "";
-	char* arrow4 = "";
-
-	bool isHardMode = snake::GetHardMode();
-	snake::SnakeColor snakeColor = snake::GetSnakeColor();
-	snake::FoodSprite foodSprite = snake::GetFoodSprite();
-
-	const char* hardMode = isHardMode ? "On" : "Off";
-	char* c_snakeColor = "";
-	char* c_foodSprite = "";
-
-	switch(snakeColor)
-	{
-	case snake::blue:  c_snakeColor = "Blue";  break;
-	case snake::red:   c_snakeColor = "Red";   break;
-	case snake::green:
-	default:    c_snakeColor = "Green"; break;
-	}
-
-	switch(foodSprite)
-	{
-	case snake::cherry: c_foodSprite = "Cherry"; break;
-	case snake::orange: c_foodSprite = "Orange"; break;
-	case snake::meat:   c_foodSprite = "Meat";   break;
-	case snake::cheese: c_foodSprite = "Cheese"; break;
-	case snake::apple:
-	default:     c_foodSprite = "Apple"; break;
-	}
-
-	switch(currentIndex){
-	case 1: arrow1  = "<-"; break;
-	case 2: arrow2  = "<-"; break;
-	case 3: arrow3  = "<-"; break;
-	case 4: arrow4  = "<-"; break;
-	}
-
-	u32 highScores[5];
-	snake::GetHighScores(highScores);
-
-	xil_printf("Options Menu\r\n");
-	xil_printf("----------------------------------------\r\n");
-	xil_printf("	Hard Mode: %s    %s\r\n", hardMode,   arrow1); // hard mode
-	xil_printf("	Snake Color: %s  %s\r\n", c_snakeColor, arrow2); // color
-	xil_printf("	Food Sprite: %s  %s\r\n", c_foodSprite, arrow3); // food
-	xil_printf("----------------------------------------\r\n");
-	xil_printf("Options:\r\n");
-	xil_printf("	Return   %s\r\n", arrow4); // return
-	xil_printf("\r\n");
-}
 
 // I like how these stubs just went unused
 
@@ -668,6 +622,22 @@ void select_option(int currentIndex){
 			case 7:
 			{
 				toggle_roaming();
+				break;
+			}
+			case 8:
+			{
+				snake::SetHardMode(!snake::GetHardMode());
+				break;
+			}
+			case 9:
+			{
+				snake::SetSnakeColor((snake::SnakeColor) (((int) snake::GetSnakeColor() + 1) % (int) snake::__SnakeColorCount__));
+				break;
+			}
+			case 10:
+			{
+				snake::SetFoodSprite((snake::FoodSprite) (((int) snake::GetFoodSprite() + 1) % (int) snake::__FoodSpriteCount__));
+				break;
 			}
 			default:
 			{
@@ -713,11 +683,17 @@ void move_cursor_up(int* currentIndex){
 			if (*currentIndex == 7){
 				//
 			}
-			else if (*currentIndex == 5){
+			else if (*currentIndex == 8){
 				*currentIndex = 7;
 			}
-			else{
-				//
+			else if (*currentIndex == 9){
+				*currentIndex = 8;
+			}
+			else if (*currentIndex == 10){
+				*currentIndex = 9;
+			}
+			else if (*currentIndex == 5){
+				*currentIndex = 10;
 			}
 
 			break;
@@ -771,10 +747,16 @@ void move_cursor_down(int* currentIndex){
 				//
 			}
 			else if (*currentIndex == 7){
-				*currentIndex = 5;
+				*currentIndex = 8;
 			}
-			else{
-				//
+			else if (*currentIndex == 8){
+				*currentIndex = 9;
+			}
+			else if (*currentIndex == 9){
+				*currentIndex = 10;
+			}
+			else if (*currentIndex == 10){
+				*currentIndex = 5;
 			}
 
 			break;
@@ -894,7 +876,7 @@ void clear_inputs(){
 	}
 }
 
-void query_input(u8 input, direction& currentDirection, direction& newDirection, XTime& tStart, XTime& tEnd, XTime& tPausedStart, XTime& tPausedEnd, XTime& tPauseElapsed)
+void query_input(u8 input, direction& currentDirection, direction& newDirection, XTime& tStart, XTime& tEnd, XTime& tPausedStart, XTime& tPausedEnd, XTime& tPauseElapsed, bool readInput)
 {
 	switch(input)
 	{
