@@ -28,7 +28,7 @@ namespace snake
 		gameplay,
 		pre_gameover,
 		gameover,
-		// options
+		options_menu
 	};
 
 	enum SnakeDirection
@@ -77,12 +77,13 @@ namespace snake
 
 	SnakeComponent* GetHead();
 
-	void SetApplePosition(u32 xPos, u32 yPos);
+	void SetApplePosition(u32 &xPos, u32 &yPos);
+	void MoveApplePosition(u32 &xPos, u32 &yPos, u8 &dir);
 	void GetApplePosition(u32& outX, u32& outY);
 
 	void GetGameplayBackground(u32* background);
 
-	void Render(state gameState, bool showHead = true, bool renderSnake = true, bool highScore = false, int cursorPosition = 0, int volume = 5);
+	void Render(state gameState, bool showHead = true, bool renderSnake = true, bool highScore = false, int cursorPosition = 0, int volume = 5, bool moving_snake = 0);
 
 	void AltRender(SnakeDirection direction, bool showHead = true, bool renderSnake = true, bool highScore = false);
 
@@ -104,6 +105,8 @@ namespace snake
 
 
 	void move_snake(SnakeDirection currentDirection);
+
+	//void toggle_pause();
 
 	void UpdateScore();
 	void ResetScore();
