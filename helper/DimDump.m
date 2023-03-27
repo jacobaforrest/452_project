@@ -1,4 +1,4 @@
-function out = DimDump(path)
+function out = DimDump(path, fOutput)
     listings = dir(path);
     fileCount = length(listings);
     widthList = zeros(fileCount - 2, 1);
@@ -18,15 +18,15 @@ function out = DimDump(path)
         end
     end
 
-    fprintf("const u16 SpriteWidths[] = \n{\n");
+    fprintf(fOutput, "const u16 SpriteWidths[] = \n{\n");
     for ii = 3:fileCount
-        fprintf("%u, ", widthList(ii - 2));
+        fprintf(fOutput, "%u, ", widthList(ii - 2));
     end
-    fprintf("\n};\n");
+    fprintf(fOutput, "\n};\n");
 
-    fprintf("const u16 SpriteHeights[] = \n{\n");
+    fprintf(fOutput, "const u16 SpriteHeights[] = \n{\n");
     for ii = 3:fileCount
-        fprintf("%u, ", heightList(ii - 2));
+        fprintf(fOutput, "%u, ", heightList(ii - 2));
     end
-    fprintf("\n};\n");
+    fprintf(fOutput, "\n};\n");
 end

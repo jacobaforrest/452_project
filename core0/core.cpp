@@ -35,8 +35,8 @@ const char* options[] =
 
 };
 
-u64 timeout_us = 200000;
-u64 gameoverTimeoutUs = 20000;
+u64 timeout_us = 400000 / 2;
+u64 gameoverTimeoutUs = 250000;
 u64 mini_timeout_us = 2000;
 int tempMovementCounter = 0;
 Xuint32 *RNG_BASEADDR_p = (Xuint32 *)(XPAR_RNG_0_S00_AXI_BASEADDR); //output stored in register 0
@@ -93,7 +93,8 @@ int main(void)
  * ---------------------------------------------------------------------------- *
  *
  * ---------------------------------------------------------------------------- */
-void finiteStateMachine(){
+void finiteStateMachine()
+{
 	u8 input = 0x00;
 	//u32 location = 0x00000000;
 	u32 new_pos;
@@ -259,6 +260,7 @@ void finiteStateMachine(){
 			case gameplay:
 			{
 				u32 curLoop = 0;
+				snake::SetHardMode(false);
 
 				snake::SetHardMode(false);
 				enum direction currentDirection = right;
@@ -272,6 +274,8 @@ void finiteStateMachine(){
 				xil_printf("Press 'd' to set direction = 'right'\r\n");
 				xil_printf("Press 's' to set direction = 'down'\r\n");
 				xil_printf("Press 'p' to pause the game\r\n");
+				input = 'd';
+
 				while (currentState == gameplay)
 				{
 					curLoop++;
@@ -287,14 +291,18 @@ void finiteStateMachine(){
 
 					u64 realTimeOut = snake::GetTimeOut(timeout_us);
 
-					while(tElapsed < timeout_us){
+					query_input(input, currentDirection, newDirection, tStart, tEnd, tPausedStart, tPausedEnd, tPauseElapsed);
+					while(tElapsed < realTimeOut)
+					{
 						input = read_input_timeout();
 						XTime_GetTime(&tEnd);
 						deltaTimeElapsed = -tElapsed;
 						tElapsed = (tEnd-tStart) / (COUNTS_PER_SECOND/1000000);
 						deltaTimeElapsed += tElapsed;
 
-						switch(input)
+						query_input(input, currentDirection, newDirection, tStart, tEnd, tPausedStart, tPausedEnd, tPauseElapsed);
+
+						if(snake::UpdateTime((u32) deltaTimeElapsed))
 						{
 							case 'w':
 							{
@@ -329,7 +337,7 @@ void finiteStateMachine(){
 								XTime_GetTime(&tPausedStart);
 								pause_game();
 								input = '~';
-								while (input != 'p'){
+								while (input != 'r'){
 									snake::render::PaintToCanvas(
 										snake::render::GetCanvas(),
 										snake::render::GetSprite(snake::sprites::PAUSED),
@@ -344,22 +352,29 @@ void finiteStateMachine(){
 								tPauseElapsed = (tPausedEnd-tPausedStart);
 								tStart = tStart + tPauseElapsed;
 
-								resume_game();
-							}
-							default:
-							{
-								break;
-							}
-						}
+					currentDirection = newDirection;
+					snake::AltRender(currentDirection);
+
+					tElapsed = 0;
+					XTime_GetTime(&tStart);
+
+					clear_inputs();
+					while(tElapsed < realTimeOut)
+					{
+						input = read_input_timeout();
+						XTime_GetTime(&tEnd);
+						deltaTimeElapsed = -tElapsed;
+						tElapsed = (tEnd-tStart) / (COUNTS_PER_SECOND/1000000);
+						deltaTimeElapsed += tElapsed;
+
+						query_input(input, currentDirection, newDirection, tStart, tEnd, tPausedStart, tPausedEnd, tPauseElapsed);
 
 						if(snake::UpdateTime((u32) deltaTimeElapsed))
 						{
 							// nothing for now. will call to update timer later.
 						}
 					}
-					clear_inputs();
 
-					currentDirection = newDirection;
 					move_snake(currentDirection);
 
 					snake::collision::CollisionFlag collision = snake::collision::DetectCollision();
@@ -381,7 +396,6 @@ void finiteStateMachine(){
 					{
 						xil_printf("Crash Detected\r\n");
 						play_crash_sound_effect();
-						snake::ResetSnakeComponents();
 						xil_printf("Storing Score to Memory\r\n");
 						currentState = pre_gameover;
 						snake::Render(currentState, false);
@@ -419,6 +433,7 @@ void finiteStateMachine(){
 						snake::Render(currentState);
 					}
 				}
+				break;
 			}
 			case pre_gameover:
 			{
@@ -442,6 +457,7 @@ void finiteStateMachine(){
 
 				snake::ResetSnakeComponents();
 				currentState = gameover;
+				break;
 			}
 			case gameover:
 			{
@@ -481,14 +497,12 @@ void finiteStateMachine(){
 						}
 					}
 				}
-
 				break;
 			}
 			default:
 			{
 				break;
 			}
-
 		}
 	}
 } // menu()
@@ -585,6 +599,62 @@ void draw_highscore_menu(int currentIndex){
 	xil_printf("\r\n");
 
 }
+
+void draw_options_menu(int currentIndex, int sideDirection)
+{
+	char* arrow1 = "";
+	char* arrow2 = "";
+	char* arrow3 = "";
+	char* arrow4 = "";
+
+	bool isHardMode = snake::GetHardMode();
+	snake::SnakeColor snakeColor = snake::GetSnakeColor();
+	snake::FoodSprite foodSprite = snake::GetFoodSprite();
+
+	const char* hardMode = isHardMode ? "On" : "Off";
+	char* c_snakeColor = "";
+	char* c_foodSprite = "";
+
+	switch(snakeColor)
+	{
+	case snake::blue:  c_snakeColor = "Blue";  break;
+	case snake::red:   c_snakeColor = "Red";   break;
+	case snake::green:
+	default:    c_snakeColor = "Green"; break;
+	}
+
+	switch(foodSprite)
+	{
+	case snake::cherry: c_foodSprite = "Cherry"; break;
+	case snake::orange: c_foodSprite = "Orange"; break;
+	case snake::meat:   c_foodSprite = "Meat";   break;
+	case snake::cheese: c_foodSprite = "Cheese"; break;
+	case snake::apple:
+	default:     c_foodSprite = "Apple"; break;
+	}
+
+	switch(currentIndex){
+	case 1: arrow1  = "<-"; break;
+	case 2: arrow2  = "<-"; break;
+	case 3: arrow3  = "<-"; break;
+	case 4: arrow4  = "<-"; break;
+	}
+
+	u32 highScores[5];
+	snake::GetHighScores(highScores);
+
+	xil_printf("Options Menu\r\n");
+	xil_printf("----------------------------------------\r\n");
+	xil_printf("	Hard Mode: %s    %s\r\n", hardMode,   arrow1); // hard mode
+	xil_printf("	Snake Color: %s  %s\r\n", c_snakeColor, arrow2); // color
+	xil_printf("	Food Sprite: %s  %s\r\n", c_foodSprite, arrow3); // food
+	xil_printf("----------------------------------------\r\n");
+	xil_printf("Options:\r\n");
+	xil_printf("	Return   %s\r\n", arrow4); // return
+	xil_printf("\r\n");
+}
+
+// I like how these stubs just went unused
 
 void get_highscores(){
 	xil_printf("Reading high scores from memory\r\n");
@@ -868,6 +938,57 @@ void clear_inputs(){
 	}
 }
 
+void query_input(u8 input, direction& currentDirection, direction& newDirection, XTime& tStart, XTime& tEnd, XTime& tPausedStart, XTime& tPausedEnd, XTime& tPauseElapsed)
+{
+	switch(input)
+	{
+		case 'w':
+		{
+			if (currentDirection != down && currentDirection != up){
+				change_direction(&newDirection, up);
+			}
+			break;
+		}
+		case 'a':
+		{
+			if (currentDirection != right && currentDirection != left){
+				change_direction(&newDirection, left);
+			}
+			break;
+		}
+		case 'd':
+		{
+			if (currentDirection != left && currentDirection != right){
+				change_direction(&newDirection, right);
+			}
+			break;
+		}
+		case 's':
+		{
+			if (currentDirection != up && currentDirection != down){
+				change_direction(&newDirection, down);
+			}
+			break;
+		}
+		case 'p':
+		{
+			XTime_GetTime(&tPausedStart);
+			pause_game();
+			while (input != 'r'){
+				input = read_input();
+			}
+			XTime_GetTime(&tPausedEnd);
+			tPauseElapsed = (tPausedEnd-tPausedStart);
+			tStart = tStart + tPauseElapsed;
+
+			resume_game();
+		}
+		default:
+		{
+			break;
+		}
+	}
+}
 
 u8 read_input_timeout(){
 	u8 value = 0;

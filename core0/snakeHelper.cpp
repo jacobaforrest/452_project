@@ -35,6 +35,8 @@ namespace snake
 	//bool paused = false;
 
 	bool hardMode = false;
+	SnakeColor snakeColor = green;
+	FoodSprite foodSprite = apple;
 
 	void Init()
 	{
@@ -555,6 +557,8 @@ namespace snake
 					32
 				);
 
+				u32 highScores[5];
+				GetHighScores(highScores);
 
 				// I
 				snake::render::PaintToCanvas(
@@ -564,12 +568,7 @@ namespace snake
 					96
 				);
 
-				snake::render::PaintToCanvas(
-					snake::render::GetCanvas(),
-					snake::render::GetSprite(snake::sprites::nine),
-					341,
-					96
-				);
+				PrintScore(highScores[0], 301, 96, false);
 
 				// II
 				snake::render::PaintToCanvas(
@@ -579,12 +578,7 @@ namespace snake
 					160
 				);
 
-				snake::render::PaintToCanvas(
-					snake::render::GetCanvas(),
-					snake::render::GetSprite(snake::sprites::eight),
-					341,
-					160
-				);
+				PrintScore(highScores[1], 301, 160, false);
 
 				// III
 				snake::render::PaintToCanvas(
@@ -594,13 +588,14 @@ namespace snake
 					224
 				);
 
+				PrintScore(highScores[2], 301, 224, false);
+
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::seven),
 					341,
 					224
 				);
-
 
 				// IV
 				snake::render::PaintToCanvas(
@@ -609,12 +604,8 @@ namespace snake
 					213,
 					288
 				);
-				snake::render::PaintToCanvas(
-					snake::render::GetCanvas(),
-					snake::render::GetSprite(snake::sprites::six),
-					341,
-					288
-				);
+
+				PrintScore(highScores[3], 301, 288, false);
 
 				// V
 				snake::render::PaintToCanvas(
@@ -623,13 +614,15 @@ namespace snake
 					213,
 					352
 				);
-				snake::render::PaintToCanvas(
+
+					snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
 					snake::render::GetSprite(snake::sprites::five),
 					341,
 					352
 				);
 
+				PrintScore(highScores[4], 301, 352, false);
 
 				// RETURN
 				snake::render::PaintToCanvas(
@@ -647,12 +640,7 @@ namespace snake
 					128,
 					416
 				);
-
-				break;
-			}
-			case options_menu:
-			{
-				snake::render::ClearCanvas(snake::render::GetCanvas());
+snake::render::ClearCanvas(snake::render::GetCanvas());
 
 				// Snake
 				snake::render::PaintToCanvas(
@@ -733,8 +721,80 @@ namespace snake
 			{
 				snake::render::DrawBackground(snake::render::GetCanvas(), background);
 
-				PrintTime(GetTime(), 32, 0);
-				PrintScore(GetScore(), 288, 0);
+				PrintTime(GetTime(), 32, 8);
+				PrintScore(GetScore(), 288, 8);
+
+				// snake head
+				snake::render::Sprite* headN;
+				snake::render::Sprite* headW;
+				snake::render::Sprite* headS;
+				snake::render::Sprite* headE;
+
+				// going east.
+				snake::render::Sprite* lEW;
+				snake::render::Sprite* dEW;
+
+				// going north
+				snake::render::Sprite* lSN;
+				snake::render::Sprite* dSN;
+
+				// <from direction> <to direction>
+				snake::render::Sprite* lNE;
+				snake::render::Sprite* lWN;
+				snake::render::Sprite* lSW;
+				snake::render::Sprite* lES;
+
+				snake::render::Sprite* dNE;
+				snake::render::Sprite* dWN;
+				snake::render::Sprite* dSW;
+				snake::render::Sprite* dES;
+
+				snake::render::Sprite* taillN;
+				snake::render::Sprite* taillW;
+				snake::render::Sprite* taillS;
+				snake::render::Sprite* taillE;
+
+				snake::render::Sprite* taildN;
+				snake::render::Sprite* taildW;
+				snake::render::Sprite* taildS;
+				snake::render::Sprite* taildE;
+
+
+
+				GetSnakeSprite(
+					false,
+
+					headN,
+					headW,
+					headS,
+					headE,
+
+					lEW,
+					dEW,
+
+					lSN,
+					dSN,
+
+					lNE,
+					lWN,
+					lSW,
+					lES,
+
+					dNE,
+					dWN,
+					dSW,
+					dES,
+
+					taillN,
+					taillW,
+					taillS,
+					taillE,
+
+					taildN,
+					taildW,
+					taildS,
+					taildE
+				);
 
 				// snake head
 				if(snakeComponents[0].m_init)
@@ -745,22 +805,22 @@ namespace snake
 					{
 						case North:
 						{
-							head = snake::render::GetSprite(snake::sprites::headN1);
+							head = headN;
 							break;
 						}
 						case South:
 						{
-							head = snake::render::GetSprite(snake::sprites::headS1);
+							head = headS;
 							break;
 						}
 						case East:
 						{
-							head = snake::render::GetSprite(snake::sprites::headE1);
+							head = headE;
 							break;
 						}
 						case West:
 						{
-							head = snake::render::GetSprite(snake::sprites::headW1);
+							head = headW;
 							break;
 						}
 
@@ -787,26 +847,22 @@ namespace snake
 					{
 						if((index & 1) == 0)
 						{
-							DrawDirectionfulSnakeComponent(snakeComponents[index - 1].m_direction, snakeComponents[index].m_direction,
+							AltDrawDirectionfulSnakeComponent(snakeComponents[index - 1].m_direction, snakeComponents[index].m_direction,
 									snakeComponents[index].m_xPos, snakeComponents[index].m_yPos,
-									snake::render::GetSprite(snake::sprites::bodyLightH1),
-									snake::render::GetSprite(snake::sprites::bodyLightV1),
-									snake::render::GetSprite(snake::sprites::bodyLightNW1),
-									snake::render::GetSprite(snake::sprites::bodyLightNE1),
-									snake::render::GetSprite(snake::sprites::bodyLightSW1),
-									snake::render::GetSprite(snake::sprites::bodyLightSE1)
+									lSN, lWN, lNE,
+									lEW, lNE, lES,
+									lSN, lSW, lES,
+									lEW, lWN, lSW
 								);
 						}
-						else
+						else // dark
 						{
-							DrawDirectionfulSnakeComponent(snakeComponents[index - 1].m_direction, snakeComponents[index].m_direction,
+							AltDrawDirectionfulSnakeComponent(snakeComponents[index - 1].m_direction, snakeComponents[index].m_direction,
 									snakeComponents[index].m_xPos, snakeComponents[index].m_yPos,
-									snake::render::GetSprite(snake::sprites::bodyDarkH1),
-									snake::render::GetSprite(snake::sprites::bodyDarkV1),
-									snake::render::GetSprite(snake::sprites::bodyDarkNW1),
-									snake::render::GetSprite(snake::sprites::bodyDarkNE1),
-									snake::render::GetSprite(snake::sprites::bodyDarkSW1),
-									snake::render::GetSprite(snake::sprites::bodyDarkSE1)
+									dSN, dWN, dNE,
+									dEW, dNE, dES,
+									dSN, dSW, dES,
+									dEW, dWN, dSW
 								);
 						}
 
@@ -823,16 +879,16 @@ namespace snake
 							switch(snakeComponents[index - 1].m_direction)
 							{
 								case North:
-								tail = snake::render::GetSprite(snake::sprites::tailLightN1);
+								tail = taillN;
 								break;
 								case South:
-								tail = snake::render::GetSprite(snake::sprites::tailLightS1);
+								tail = taillS;
 								break;
 								case East:
-								tail = snake::render::GetSprite(snake::sprites::tailLightE1);
+								tail = taillE;
 								break;
 								case West:
-								tail = snake::render::GetSprite(snake::sprites::tailLightW1);
+								tail = taillW;
 								default:
 								break;
 							}
@@ -842,16 +898,16 @@ namespace snake
 							switch(snakeComponents[index - 1].m_direction)
 							{
 								case North:
-								tail = snake::render::GetSprite(snake::sprites::tailDarkN1);
+								tail = taildN;
 								break;
 								case South:
-								tail = snake::render::GetSprite(snake::sprites::tailDarkS1);
+								tail = taildS;
 								break;
 								case East:
-								tail = snake::render::GetSprite(snake::sprites::tailDarkE1);
+								tail = taildE;
 								break;
 								case West:
-								tail = snake::render::GetSprite(snake::sprites::tailDarkW1);
+								tail = taildW;
 								default:
 								break;
 							}
@@ -865,13 +921,13 @@ namespace snake
 						);
 					}
 				}
-
-
+				snake::render::Sprite* foodSprite;
+				GetFoodSprite(foodSprite);
 
 				// draw apple
 				snake::render::PaintToCanvas(
 					snake::render::GetCanvas(),
-					snake::render::GetSprite(snake::sprites::apple),
+					foodSprite,
 					GRID_START_X + appleX * FOOD_BOUNDS,
 					GRID_START_Y + appleY * FOOD_BOUNDS
 				);
@@ -903,6 +959,17 @@ namespace snake
 					432
 				);
 
+				if(IsHighScore(GetScore()))
+				{
+					snake::render::PaintToCanvas(
+						snake::render::GetCanvas(),
+						snake::render::GetSprite(snake::sprites::HIGH),
+						288 - 192,
+						8
+					);
+				}
+				PrintScore(GetScore(), 192, 8);
+
 				break;
 			}
 			default:
@@ -917,14 +984,291 @@ namespace snake
 		snake::render::Draw();
 	}
 
-	void AltRender(bool showHead, bool renderSnake, bool highScore)
+	void AltRender(SnakeDirection direction, bool showHead, bool renderSnake, bool highScore)
 	{
+		snake::render::DrawBackground(snake::render::GetCanvas(), background);
 
+		PrintTime(GetTime(), 32, 8);
+		PrintScore(GetScore(), 288, 8);
+
+		// snake head
+		snake::render::Sprite* headN;
+		snake::render::Sprite* headW;
+		snake::render::Sprite* headS;
+		snake::render::Sprite* headE;
+
+		// going east.
+		snake::render::Sprite* lEW;
+		snake::render::Sprite* dEW;
+
+		// going north
+		snake::render::Sprite* lSN;
+		snake::render::Sprite* dSN;
+
+		// <from direction> <to direction>
+		snake::render::Sprite* lNE;
+		snake::render::Sprite* lWN;
+		snake::render::Sprite* lSW;
+		snake::render::Sprite* lES;
+
+		snake::render::Sprite* dNE;
+		snake::render::Sprite* dWN;
+		snake::render::Sprite* dSW;
+		snake::render::Sprite* dES;
+
+		snake::render::Sprite* taillN;
+		snake::render::Sprite* taillW;
+		snake::render::Sprite* taillS;
+		snake::render::Sprite* taillE;
+
+		snake::render::Sprite* taildN;
+		snake::render::Sprite* taildW;
+		snake::render::Sprite* taildS;
+		snake::render::Sprite* taildE;
+
+
+
+		GetSnakeSprite(
+			true,
+
+			headN,
+			headW,
+			headS,
+			headE,
+
+			lEW,
+			dEW,
+
+			lSN,
+			dSN,
+
+			lNE,
+			lWN,
+			lSW,
+			lES,
+
+			dNE,
+			dWN,
+			dSW,
+			dES,
+
+			taillN,
+			taillW,
+			taillS,
+			taillE,
+
+			taildN,
+			taildW,
+			taildS,
+			taildE
+		);
+
+
+		if(!snakeComponents[1].m_init)
+		{
+			snake::render::Sprite* tail = NULL;
+			switch(direction)
+			{
+				case North:
+				tail = taillN;
+				break;
+				case South:
+				tail = taillS;
+				break;
+				case East:
+				tail = taillE;
+				break;
+				case West:
+				tail = taillW;
+				default:
+				break;
+			}
+
+			snake::render::PaintToCanvas(
+				snake::render::GetCanvas(),
+				tail,
+				snakeComponents[0].m_xPos,
+				snakeComponents[0].m_yPos
+			);
+		}
+		else
+		{
+			AltDrawDirectionfulSnakeComponent(direction, snakeComponents[0].m_direction,
+				snakeComponents[0].m_xPos, snakeComponents[0].m_yPos,
+				dSN, dWN, lNE,
+				dEW, dNE, lES,
+				lSN, lSW, dES,
+				lEW, lWN, dSW
+			);
+		}
+
+		// snake body
+		int index = 1;
+
+		if(renderSnake)
+		{
+			while(snakeComponents[index].m_init && snakeComponents[index + 1].m_init)
+			{
+				if((index & 1) == 0) // light
+				{
+					AltDrawDirectionfulSnakeComponent(snakeComponents[index - 1].m_direction, snakeComponents[index].m_direction,
+							snakeComponents[index].m_xPos, snakeComponents[index].m_yPos,
+							dSN, dWN, lNE,
+							dEW, dNE, lES,
+							lSN, lSW, dES,
+							lEW, lWN, dSW
+						);
+				}
+				else // dark
+				{
+					AltDrawDirectionfulSnakeComponent(snakeComponents[index - 1].m_direction, snakeComponents[index].m_direction,
+							snakeComponents[index].m_xPos, snakeComponents[index].m_yPos,
+							lSN, lWN, dNE,
+							lEW, lNE, dES,
+							dSN, dSW, lES,
+							dEW, dWN, lSW
+						);
+				}
+
+				++index;
+			}
+
+			// snake tail
+			if(snakeComponents[index].m_init)
+			{
+				snake::render::Sprite* tail = NULL;
+
+				if((index & 1) == 0)
+				{
+					switch(snakeComponents[index - 1].m_direction)
+					{
+						case North:
+						tail = taillN;
+						break;
+						case South:
+						tail = taillS;
+						break;
+						case East:
+						tail = taillE;
+						break;
+						case West:
+						tail = taillW;
+						default:
+						break;
+					}
+				}
+				else
+				{
+					switch(snakeComponents[index - 1].m_direction)
+					{
+						case North:
+						tail = taildN;
+						break;
+						case South:
+						tail = taildS;
+						break;
+						case East:
+						tail = taildE;
+						break;
+						case West:
+						tail = taildW;
+						default:
+						break;
+					}
+				}
+
+				snake::render::PaintToCanvas(
+					snake::render::GetCanvas(),
+					tail,
+					snakeComponents[index].m_xPos,
+					snakeComponents[index].m_yPos
+				);
+			}
+		}
+
+		snake::render::Sprite* foodSprite;
+		GetFoodSprite(foodSprite);
+
+		// draw apple
+		snake::render::PaintToCanvas(
+			snake::render::GetCanvas(),
+			foodSprite,
+			GRID_START_X + appleX * FOOD_BOUNDS,
+			GRID_START_Y + appleY * FOOD_BOUNDS
+		);
+
+		if(snakeComponents[0].m_init)
+		{
+			snake::render::Sprite* head = NULL;
+
+			s32 xPos = snakeComponents[0].m_xPos;
+			s32 yPos = snakeComponents[0].m_yPos;
+
+			switch(direction)
+			{
+
+				case North:
+				{
+					head = headN;
+					yPos -= snake::sprites::SpriteWidths[snake::sprites::headN2] / 2;
+					break;
+				}
+				case South:
+				{
+					head = headS;
+					yPos += snake::sprites::SpriteWidths[snake::sprites::headS2];
+					break;
+				}
+				case East:
+				{
+					head = headE;
+					xPos += 2 * snake::sprites::SpriteWidths[snake::sprites::headE2];
+					break;
+				}
+				case West:
+				{
+					head = headW;
+					xPos -= snake::sprites::SpriteWidths[snake::sprites::headW2];
+					break;
+				}
+			}
+
+			assert(head);
+
+			if(showHead)
+			{
+				snake::render::PaintToCanvas(
+					snake::render::GetCanvas(),
+					head,
+					xPos,
+					yPos
+				);
+			}
+		}
+
+		snake::render::Draw();
+		snake::render::Draw();
+		snake::render::Draw();
+		snake::render::Draw();
 	}
 
-	void DrawDirectionfulSnakeComponent(SnakeDirection thisDirection, SnakeDirection nextDirection,
-										s32 xPos, s32 yPos,
-										snake::render::Sprite* horizontal, snake::render::Sprite* vertical, snake::render::Sprite* nw, snake::render::Sprite* ne, snake::render::Sprite* sw, snake::render::Sprite* se)
+	void AltDrawDirectionfulSnakeComponent(
+			SnakeDirection thisDirection,
+			SnakeDirection nextDirection,
+			s32 xPos, s32 yPos,
+			snake::render::Sprite* ns,
+			snake::render::Sprite* nw,
+			snake::render::Sprite* ne,
+			snake::render::Sprite* ew,
+			snake::render::Sprite* en,
+			snake::render::Sprite* es,
+			snake::render::Sprite* sn,
+			snake::render::Sprite* sw,
+			snake::render::Sprite* se,
+			snake::render::Sprite* we,
+			snake::render::Sprite* wn,
+			snake::render::Sprite* ws
+		)
 	{
 		snake::render::Sprite* drawingSprite = NULL;
 
@@ -932,52 +1276,37 @@ namespace snake
 		{
 			if(nextDirection == North || nextDirection == South)
 			{
-				drawingSprite = vertical;
-			}
-			else if(nextDirection == East)
-			{
-				drawingSprite = nw;
+				drawingSprite = sn;
 			}
 			else if(nextDirection == West)
 			{
-				drawingSprite = ne;
+				drawingSprite = en;
+			}
+			else if(nextDirection == East)
+			{
+				drawingSprite = wn;
 			}
 		}
 		else if (thisDirection == South)
 		{
 			if(nextDirection == North || nextDirection == South)
 			{
-				drawingSprite = vertical;
-			}
-			else if(nextDirection == East)
-			{
-				drawingSprite = sw;
+				drawingSprite = ns;
 			}
 			else if(nextDirection == West)
 			{
-				drawingSprite = se;
+				drawingSprite = es;
+			}
+			else if(nextDirection == East)
+			{
+				drawingSprite = ws;
 			}
 		}
-		else if (thisDirection == East)
+		else if (thisDirection == West)
 		{
 			if(nextDirection == East || nextDirection == West)
 			{
-				drawingSprite = horizontal;
-			}
-			else if(nextDirection == North)
-			{
-				drawingSprite = se;
-			}
-			else if(nextDirection == South)
-			{
-				drawingSprite = ne;
-			}
-		}
-		else // West
-		{
-			if(nextDirection == East || nextDirection == West)
-			{
-				drawingSprite = horizontal;
+				drawingSprite = ew;
 			}
 			else if(nextDirection == North)
 			{
@@ -986,6 +1315,21 @@ namespace snake
 			else if(nextDirection == South)
 			{
 				drawingSprite = nw;
+			}
+		}
+		else // East
+		{
+			if(nextDirection == East || nextDirection == West)
+			{
+				drawingSprite = we;
+			}
+			else if(nextDirection == North)
+			{
+				drawingSprite = se;
+			}
+			else if(nextDirection == South)
+			{
+				drawingSprite = ne;
 			}
 		}
 
@@ -1079,6 +1423,11 @@ namespace snake
 		return score;
 	}
 
+	bool IsHighScore(u32 score)
+	{
+		return score >= highScores[0];
+	}
+
 	void GetHighScores(u32 outHighScores[5])
 	{
 		for(int i = 0; i < 5; ++i)
@@ -1105,7 +1454,7 @@ namespace snake
 		}
 	}
 
-	void PrintScore(u32 score, u32 xPos, u32 yPos)
+	void PrintScore(u32 score, u32 xPos, u32 yPos, bool showScoreWord)
 	{
 		const snake::sprites::SpriteIndex indicies[] =
 		{
@@ -1138,14 +1487,17 @@ namespace snake
 		score -= (score / 10) * 10;
 		ones = indicies[score];
 
-		snake::render::PaintToCanvas(
-			snake::render::GetCanvas(),
-			snake::render::GetSprite(snake::sprites::SCORE),
-			xPos,
-			yPos
-		);
+		if(showScoreWord)
+		{
+			snake::render::PaintToCanvas(
+				snake::render::GetCanvas(),
+				snake::render::GetSprite(snake::sprites::SCORE),
+				xPos,
+				yPos
+			);
 
-		xPos += snake::sprites::SpriteWidths[snake::sprites::SCORE];
+			xPos += snake::sprites::SpriteWidths[snake::sprites::SCORE];
+		}
 
 		// this is almost the worst code i've written...
 		bool nonZero = false;
@@ -1229,10 +1581,6 @@ namespace snake
 		);
 	}
 
-	void PrintHighScores(u32 xPos, u32 yPos)
-	{
-
-	}
 
 	bool UpdateTime(u32 us)
 	{
@@ -1338,6 +1686,11 @@ namespace snake
 		hardMode = isHardMode;
 	}
 
+	bool GetHardMode()
+	{
+		return hardMode;
+	}
+
 	u64 GetTimeOut(u64 baseTimeOut)
 	{
 		if(!hardMode)
@@ -1345,7 +1698,185 @@ namespace snake
 			return baseTimeOut;
 		}
 
+		u32 score = GetScore();
+
+		if(score < 100)
+		{
+			return baseTimeOut;
+		}
+		if(score < 1000)
+		{
+			return baseTimeOut / 2;
+		}
+		if(score < 10000)
+		{
+			return baseTimeOut / 4;
+		}
+		if(score < 100000)
+		{
+			return baseTimeOut / 8;
+		}
+
 		// stub. will have altered time in hard mode.
 		return baseTimeOut;
+	}
+
+	void SetSnakeColor(SnakeColor newColor)
+	{
+		snakeColor = newColor;
+	}
+
+	SnakeColor GetSnakeColor()
+	{
+		return snakeColor;
+	}
+
+	void SetFoodSprite(FoodSprite newFood)
+	{
+		foodSprite = newFood;
+	}
+
+	FoodSprite GetFoodSprite()
+	{
+		return foodSprite;
+	}
+
+	void GetFoodSprite(snake::render::Sprite*& outSprite)
+	{
+		switch(foodSprite)
+		{
+			case orange:
+			{
+				outSprite = snake::render::GetSprite(snake::sprites::orange);
+				break;
+			}
+			case cherry:
+			{
+				outSprite = snake::render::GetSprite(snake::sprites::cherry);
+				break;
+			}
+			case meat:
+			{
+				outSprite = snake::render::GetSprite(snake::sprites::meat);
+				break;
+			}
+			case cheese:
+			{
+				outSprite = snake::render::GetSprite(snake::sprites::cheese);
+				break;
+			}
+			case apple:
+			default:
+			{
+				outSprite = snake::render::GetSprite(snake::sprites::apple);
+				break;
+			}
+		}
+	}
+
+	void GetSnakeSprite(
+		bool isOffFrame,
+
+		snake::render::Sprite*& headN,
+		snake::render::Sprite*& headW,
+		snake::render::Sprite*& headS,
+		snake::render::Sprite*& headE,
+
+		snake::render::Sprite*& lEW,
+		snake::render::Sprite*& dEW,
+
+		snake::render::Sprite*& lSN,
+		snake::render::Sprite*& dSN,
+		
+		snake::render::Sprite*& lNE,
+		snake::render::Sprite*& lWN,
+		snake::render::Sprite*& lSW,
+		snake::render::Sprite*& lES,
+		
+		snake::render::Sprite*& dNE,
+		snake::render::Sprite*& dWN,
+		snake::render::Sprite*& dSW,
+		snake::render::Sprite*& dES,
+		
+		snake::render::Sprite*& taillN,
+		snake::render::Sprite*& taillW,
+		snake::render::Sprite*& taillS,
+		snake::render::Sprite*& taillE,
+		
+		snake::render::Sprite*& taildN,
+		snake::render::Sprite*& taildW,
+		snake::render::Sprite*& taildS,
+		snake::render::Sprite*& taildE
+		)
+	{
+		using namespace snake::sprites;
+		using namespace snake::render;
+
+		if(isOffFrame)
+		{
+			headN = snakeColor == green ? GetSprite(headN2) : snakeColor == red ? GetSprite(headN2r) : GetSprite(headN2b);
+			headW = snakeColor == green ? GetSprite(headW2) : snakeColor == red ? GetSprite(headW2r) : GetSprite(headW2b);
+			headS = snakeColor == green ? GetSprite(headS2) : snakeColor == red ? GetSprite(headS2r) : GetSprite(headS2b);
+			headE = snakeColor == green ? GetSprite(headE2) : snakeColor == red ? GetSprite(headE2r) : GetSprite(headE2b);
+
+			lEW = snakeColor == green ? GetSprite(bodyDarkH2) : snakeColor == red ? GetSprite(bodyDarkH2r) : GetSprite(bodyDarkH2b);
+			dEW = snakeColor == green ? GetSprite(bodyLightH2) : snakeColor == red ? GetSprite(bodyLightH2r) : GetSprite(bodyLightH2b);
+
+			lSN = snakeColor == green ? GetSprite(bodyLightV2) : snakeColor == red ? GetSprite(bodyLightV2r) : GetSprite(bodyLightV2b);
+			dSN = snakeColor == green ? GetSprite(bodyDarkV2) : snakeColor == red ? GetSprite(bodyDarkV2r) : GetSprite(bodyDarkV2b);
+			
+			lNE = snakeColor == green ? GetSprite(bodyLightNE2) : snakeColor == red ? GetSprite(bodyLightNE2r) : GetSprite(bodyLightNE2b);
+			lWN = snakeColor == green ? GetSprite(bodyDarkNE2)  : snakeColor == red ? GetSprite(bodyDarkNE2r)  : GetSprite(bodyDarkNE2b);
+			lSW = snakeColor == green ? GetSprite(bodyLightSW2) : snakeColor == red ? GetSprite(bodyLightSW2r) : GetSprite(bodyLightSW2b);
+			lES = snakeColor == green ? GetSprite(bodyDarkSW2) : snakeColor == red ? GetSprite(bodyDarkSW2r) : GetSprite(bodyDarkSW2b);
+			
+			dNE = snakeColor == green ? GetSprite(bodyDarkNW2)  : snakeColor == red ? GetSprite(bodyDarkNW2r)  : GetSprite(bodyDarkNW2b);
+			dWN = snakeColor == green ? GetSprite(bodyLightNW2) : snakeColor == red ? GetSprite(bodyLightNW2r) : GetSprite(bodyLightNW2b);
+			dSW = snakeColor == green ? GetSprite(bodyDarkSE2)  : snakeColor == red ? GetSprite(bodyDarkSE2r)  : GetSprite(bodyDarkSE2b);
+			dES = snakeColor == green ? GetSprite(bodyLightSE2)  : snakeColor == red ? GetSprite(bodyLightSE2r)  : GetSprite(bodyLightSE2b);
+		
+			taillN = snakeColor == green ? GetSprite(tailLightN2) : snakeColor == red ? GetSprite(tailLightN2r) : GetSprite(tailLightN2b);
+			taillW = snakeColor == green ? GetSprite(tailLightW2) : snakeColor == red ? GetSprite(tailLightW2r) : GetSprite(tailLightW2b);
+			taillS = snakeColor == green ? GetSprite(tailLightS2) : snakeColor == red ? GetSprite(tailLightS2r) : GetSprite(tailLightS2b);
+			taillE = snakeColor == green ? GetSprite(tailLightE2) : snakeColor == red ? GetSprite(tailLightE2r) : GetSprite(tailLightE2b);
+			
+			taildN = snakeColor == green ? GetSprite(tailDarkN2) : snakeColor == red ? GetSprite(tailDarkN2r) : GetSprite(tailDarkN2b);
+			taildW = snakeColor == green ? GetSprite(tailDarkW2) : snakeColor == red ? GetSprite(tailDarkW2r) : GetSprite(tailDarkW2b);
+			taildS = snakeColor == green ? GetSprite(tailDarkS2) : snakeColor == red ? GetSprite(tailDarkS2r) : GetSprite(tailDarkS2b);
+			taildE = snakeColor == green ? GetSprite(tailDarkE2) : snakeColor == red ? GetSprite(tailDarkE2r) : GetSprite(tailDarkE2b);
+		}
+		else
+		{
+			headN = snakeColor == green ? GetSprite(headN1) : snakeColor == red ? GetSprite(headN1r) : GetSprite(headN1b);
+			headW = snakeColor == green ? GetSprite(headW1) : snakeColor == red ? GetSprite(headW1r) : GetSprite(headW1b);
+			headS = snakeColor == green ? GetSprite(headS1) : snakeColor == red ? GetSprite(headS1r) : GetSprite(headS1b);
+			headE = snakeColor == green ? GetSprite(headE1) : snakeColor == red ? GetSprite(headE1r) : GetSprite(headE1b);
+
+			lEW = snakeColor == green ? GetSprite(bodyLightH1) : snakeColor == red ? GetSprite(bodyLightH1r) : GetSprite(bodyLightH1b);
+			dEW = snakeColor == green ? GetSprite(bodyDarkH1) : snakeColor == red ? GetSprite(bodyDarkH1r) : GetSprite(bodyDarkH1b);
+
+			lSN = snakeColor == green ? GetSprite(bodyLightV1) : snakeColor == red ? GetSprite(bodyLightV1r) : GetSprite(bodyLightV1b);
+			dSN = snakeColor == green ? GetSprite(bodyDarkV1) : snakeColor == red ? GetSprite(bodyDarkV1r) : GetSprite(bodyDarkV1b);
+			
+			lNE = snakeColor == green ? GetSprite(bodyLightNE1) : snakeColor == red ? GetSprite(bodyLightNE1r) : GetSprite(bodyLightNE1b);
+			lWN = snakeColor == green ? GetSprite(bodyLightNW1)  : snakeColor == red ? GetSprite(bodyLightNW1r)  : GetSprite(bodyLightNW1b);
+			lSW = snakeColor == green ? GetSprite(bodyLightSW1) : snakeColor == red ? GetSprite(bodyLightSW1r) : GetSprite(bodyLightSW1b);
+			lES = snakeColor == green ? GetSprite(bodyLightSE1) : snakeColor == red ? GetSprite(bodyLightSE1r) : GetSprite(bodyLightSE1b);
+			
+			dNE = snakeColor == green ? GetSprite(bodyDarkNE1) : snakeColor == red ? GetSprite(bodyDarkNE1r) : GetSprite(bodyDarkNE1b);
+			dWN = snakeColor == green ? GetSprite(bodyDarkNW1) : snakeColor == red ? GetSprite(bodyDarkNW1r) : GetSprite(bodyDarkNW1b);
+			dSW = snakeColor == green ? GetSprite(bodyDarkSW1) : snakeColor == red ? GetSprite(bodyDarkSW1r) : GetSprite(bodyDarkSW1b);
+			dES = snakeColor == green ? GetSprite(bodyDarkSE1) : snakeColor == red ? GetSprite(bodyDarkSE1r) : GetSprite(bodyDarkSE1b);
+		
+			taillN = snakeColor == green ? GetSprite(tailLightN1) : snakeColor == red ? GetSprite(tailLightN1r) : GetSprite(tailLightN1b);
+			taillW = snakeColor == green ? GetSprite(tailLightW1) : snakeColor == red ? GetSprite(tailLightW1r) : GetSprite(tailLightW1b);
+			taillS = snakeColor == green ? GetSprite(tailLightS1) : snakeColor == red ? GetSprite(tailLightS1r) : GetSprite(tailLightS1b);
+			taillE = snakeColor == green ? GetSprite(tailLightE1) : snakeColor == red ? GetSprite(tailLightE1r) : GetSprite(tailLightE1b);
+			
+			taildN = snakeColor == green ? GetSprite(tailDarkN1) : snakeColor == red ? GetSprite(tailDarkN1r) : GetSprite(tailDarkN1b);
+			taildW = snakeColor == green ? GetSprite(tailDarkW1) : snakeColor == red ? GetSprite(tailDarkW1r) : GetSprite(tailDarkW1b);
+			taildS = snakeColor == green ? GetSprite(tailDarkS1) : snakeColor == red ? GetSprite(tailDarkS1r) : GetSprite(tailDarkS1b);
+			taildE = snakeColor == green ? GetSprite(tailDarkE1) : snakeColor == red ? GetSprite(tailDarkE1r) : GetSprite(tailDarkE1b);
+		}
 	}
 }

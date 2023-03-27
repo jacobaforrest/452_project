@@ -1,25 +1,25 @@
-function GraphicsDump(name, path, maxSize)
+function GraphicsDump(name, path, maxSize, fOutput)
     im = imread(path);
 
     [h, w, d] = size(im);
 
-    fprintf("{\n");
+    fprintf(fOutput, "{\n");
     for ii = 1:h
-        fprintf("\t");
+        fprintf(fOutput, "\t");
         for jj = 1:w
-            fprintf("0xFF");
+            fprintf(fOutput, "0xFF");
             for kk = [3, 2, 1]
-                fprintf("%02X", im(ii, jj, kk));
+                fprintf(fOutput, "%02X", im(ii, jj, kk));
             end
-            fprintf(", ");
+            fprintf(fOutput, ", ");
         end
-        fprintf("\n");
+        fprintf(fOutput, "\n");
     end
 
-    fprintf("\t");
+    fprintf(fOutput, "\t");
     for ii = (w*h):(maxSize-1)
-        % fprintf("0x0, ");
+        % fprintf(fOutput, "0x0, ");
     end
 
-    fprintf("\n},\n");
+    fprintf(fOutput, "\n},\n");
 end
