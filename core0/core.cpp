@@ -304,53 +304,9 @@ void finiteStateMachine()
 
 						if(snake::UpdateTime((u32) deltaTimeElapsed))
 						{
-							case 'w':
-							{
-								if (currentDirection != down && currentDirection != up){
-									change_direction(&newDirection, up);
-								}
-								break;
-							}
-							case 'a':
-							{
-								if (currentDirection != right && currentDirection != left){
-									change_direction(&newDirection, left);
-								}
-								break;
-							}
-							case 'd':
-							{
-								if (currentDirection != left && currentDirection != right){
-									change_direction(&newDirection, right);
-								}
-								break;
-							}
-							case 's':
-							{
-								if (currentDirection != up && currentDirection != down){
-									change_direction(&newDirection, down);
-								}
-								break;
-							}
-							case 'p':
-							{
-								XTime_GetTime(&tPausedStart);
-								pause_game();
-								input = '~';
-								while (input != 'r'){
-									snake::render::PaintToCanvas(
-										snake::render::GetCanvas(),
-										snake::render::GetSprite(snake::sprites::PAUSED),
-										600,
-										240
-									);
-									snake::render::Draw();
-									snake::render::Draw();
-									input = read_input();
-								}
-								XTime_GetTime(&tPausedEnd);
-								tPauseElapsed = (tPausedEnd-tPausedStart);
-								tStart = tStart + tPauseElapsed;
+
+						}
+					}
 
 					currentDirection = newDirection;
 					snake::AltRender(currentDirection);
@@ -944,7 +900,8 @@ void query_input(u8 input, direction& currentDirection, direction& newDirection,
 	{
 		case 'w':
 		{
-			if (currentDirection != down && currentDirection != up){
+			if (currentDirection != down && currentDirection != up)
+			{
 				change_direction(&newDirection, up);
 			}
 			break;
@@ -974,18 +931,22 @@ void query_input(u8 input, direction& currentDirection, direction& newDirection,
 		{
 			XTime_GetTime(&tPausedStart);
 			pause_game();
-			while (input != 'r'){
+			input = '~';
+			while (input != 'r')
+			{
+				snake::render::PaintToCanvas(
+					snake::render::GetCanvas(),
+					snake::render::GetSprite(snake::sprites::PAUSED),
+					600,
+					240
+				);
+				snake::render::Draw();
+				snake::render::Draw();
 				input = read_input();
 			}
 			XTime_GetTime(&tPausedEnd);
 			tPauseElapsed = (tPausedEnd-tPausedStart);
 			tStart = tStart + tPauseElapsed;
-
-			resume_game();
-		}
-		default:
-		{
-			break;
 		}
 	}
 }
