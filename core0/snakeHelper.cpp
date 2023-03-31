@@ -131,7 +131,7 @@ namespace snake
 		yPos = appleY;
 
 
-		xil_printf("Spawning Apple with coordinates: %i, %i\r\n", appleX, appleY);
+		// xil_printf("Spawning Apple with coordinates: %i, %i\r\n", appleX, appleY);
 	}
 
 	void MoveApplePosition(u32 &xPos, u32 &yPos, u8 &dir)
@@ -140,9 +140,9 @@ namespace snake
 		appleX = xPos;
 		appleY = yPos;
 
-		xil_printf("Apple direction: %i\r\n", dir);
-		xil_printf("xPos: %i\r\n", xPos);
-		xil_printf("yPos: %i\r\n", yPos);
+		// xil_printf("Apple direction: %i\r\n", dir);
+		// xil_printf("xPos: %i\r\n", xPos);
+		// xil_printf("yPos: %i\r\n", yPos);
 
 
 
@@ -297,7 +297,7 @@ namespace snake
 			}
 		}
 
-		xil_printf("Spawning Apple with coordinates: %i, %i\r\n", appleX, appleY);
+		// xil_printf("Spawning Apple with coordinates: %i, %i\r\n", appleX, appleY);
 	}
 
 
@@ -941,7 +941,10 @@ namespace snake
 				snake::render::Sprite* explosion1 = snake::render::GetSprite(snake::sprites::explosion1);
 				snake::render::Sprite* explosion2 = snake::render::GetSprite(snake::sprites::explosion2);
 				snake::render::Sprite* explosion3 = snake::render::GetSprite(snake::sprites::explosion3);
-				snake::render::Sprite* explosion4 = snake::render::GetSprite(snake::sprites::bg);
+
+				snake::render::Sprite* explosion1BSLess = snake::render::GetSprite(snake::sprites::explosion1bgless);
+				snake::render::Sprite* explosion2BSLess = snake::render::GetSprite(snake::sprites::explosion2bgless);
+				snake::render::Sprite* explosion3BSLess = snake::render::GetSprite(snake::sprites::explosion3bgless);
 
 				switch(explosionIndex)
 				{
@@ -949,7 +952,7 @@ namespace snake
 				{
 					snake::render::PaintToCanvas(
 						snake::render::GetCanvas(),
-						explosion1,
+						snake::collision::IsOutOfBounds(snakeComponents[0].m_xPos, snakeComponents[0].m_yPos, SNAKE_BOUNDS, SNAKE_BOUNDS) ? explosion1BSLess : explosion1,
 						snakeComponents[0].m_xPos,
 						snakeComponents[0].m_yPos
 					);
@@ -959,7 +962,7 @@ namespace snake
 				{
 					snake::render::PaintToCanvas(
 						snake::render::GetCanvas(),
-						explosion2,
+						snake::collision::IsOutOfBounds(snakeComponents[0].m_xPos, snakeComponents[0].m_yPos, SNAKE_BOUNDS, SNAKE_BOUNDS) ? explosion2BSLess : explosion2,
 						snakeComponents[0].m_xPos,
 						snakeComponents[0].m_yPos
 					);
@@ -969,7 +972,7 @@ namespace snake
 				{
 					snake::render::PaintToCanvas(
 						snake::render::GetCanvas(),
-						explosion3,
+						snake::collision::IsOutOfBounds(snakeComponents[0].m_xPos, snakeComponents[0].m_yPos, SNAKE_BOUNDS, SNAKE_BOUNDS) ? explosion3BSLess : explosion3,
 						snakeComponents[0].m_xPos,
 						snakeComponents[0].m_yPos
 					);
@@ -1639,30 +1642,82 @@ namespace snake
 			s32 xPos = snakeComponents[0].m_xPos;
 			s32 yPos = snakeComponents[0].m_yPos;
 
+			snake::render::Sprite* headNBGLess = NULL;
+			snake::render::Sprite* headWBGLess = NULL;
+			snake::render::Sprite* headEBGLess = NULL;
+			snake::render::Sprite* headSBGLess = NULL;
+
+			switch(snakeColor)
+			{
+			case blue:
+			{
+				headNBGLess = snake::render::GetSprite(snake::sprites::headN2bbgless);
+				headWBGLess = snake::render::GetSprite(snake::sprites::headW2bbgless);
+				headEBGLess = snake::render::GetSprite(snake::sprites::headE2bbgless);
+				headSBGLess = snake::render::GetSprite(snake::sprites::headS2bbgless);
+				break;
+			}
+			case red:
+			{
+				headNBGLess = snake::render::GetSprite(snake::sprites::headN2rbgless);
+				headWBGLess = snake::render::GetSprite(snake::sprites::headW2rbgless);
+				headEBGLess = snake::render::GetSprite(snake::sprites::headE2rbgless);
+				headSBGLess = snake::render::GetSprite(snake::sprites::headS2rbgless);
+				break;
+			}
+			case green:
+			default:
+			{
+				headNBGLess = snake::render::GetSprite(snake::sprites::headN2bgless);
+				headWBGLess = snake::render::GetSprite(snake::sprites::headW2bgless);
+				headEBGLess = snake::render::GetSprite(snake::sprites::headE2bgless);
+				headSBGLess = snake::render::GetSprite(snake::sprites::headS2bgless);
+				break;
+			}
+
+			}
+
 			switch(direction)
 			{
 
 				case North:
 				{
-					head = headN;
+					head = snake::collision::IsOutOfBounds(
+							xPos,
+							yPos - snake::sprites::SpriteWidths[snake::sprites::headN2] / 2,
+							snake::sprites::SpriteWidths[snake::sprites::headN2],
+							snake::sprites::SpriteHeights[snake::sprites::headN2]) ?  headNBGLess : headN;
+
 					yPos -= snake::sprites::SpriteWidths[snake::sprites::headN2] / 2;
 					break;
 				}
 				case South:
 				{
-					head = headS;
+					head = snake::collision::IsOutOfBounds(
+							xPos,
+							yPos + snake::sprites::SpriteWidths[snake::sprites::headS2] / 2,
+							snake::sprites::SpriteWidths[snake::sprites::headS2],
+							snake::sprites::SpriteHeights[snake::sprites::headS2]) ?  headSBGLess : headS;
 					yPos += snake::sprites::SpriteWidths[snake::sprites::headS2];
 					break;
 				}
 				case East:
 				{
-					head = headE;
+					head = snake::collision::IsOutOfBounds(
+							xPos + 2 * snake::sprites::SpriteWidths[snake::sprites::headE2],
+							yPos,
+							snake::sprites::SpriteWidths[snake::sprites::headE2],
+							snake::sprites::SpriteHeights[snake::sprites::headE2]) ?  headEBGLess : headE;
 					xPos += 2 * snake::sprites::SpriteWidths[snake::sprites::headE2];
 					break;
 				}
 				case West:
 				{
-					head = headW;
+					head = snake::collision::IsOutOfBounds(
+							xPos - snake::sprites::SpriteWidths[snake::sprites::headW2],
+							yPos,
+							snake::sprites::SpriteWidths[snake::sprites::headW2],
+							snake::sprites::SpriteHeights[snake::sprites::headW2]) ?  headWBGLess : headW;
 					xPos -= snake::sprites::SpriteWidths[snake::sprites::headW2];
 					break;
 				}
@@ -1781,7 +1836,7 @@ namespace snake
 
 	void move_snake(SnakeDirection currentDirection)
 	{
-		xil_printf("Snake moved forward one unit\r\n");
+		// xil_printf("Snake moved forward one unit\r\n");
 
 		spawnX = snakeComponents[nextBody - 1].m_xPos;
 		spawnY = snakeComponents[nextBody - 1].m_yPos;
@@ -2314,4 +2369,6 @@ namespace snake
 			taildE = snakeColor == green ? GetSprite(tailDarkE1) : snakeColor == red ? GetSprite(tailDarkE1r) : GetSprite(tailDarkE1b);
 		}
 	}
+
+
 }

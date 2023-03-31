@@ -121,70 +121,70 @@ namespace debug
 			bool test1Passed = Unit1();
 			if(!test1Passed)
 			{
-				xil_printf("Rendering Test 1 Failed.\n");
+				// xil_printf("Rendering Test 1 Failed.\n");
 				snake::render::Draw();
 			}
 
 			bool test2Passed = Unit2();
 			if(!test2Passed)
 			{
-				xil_printf("Rendering Test 2 Failed.\n");
+				// xil_printf("Rendering Test 2 Failed.\n");
 				snake::render::Draw();
 			}
 
 			bool test3Passed = Unit3();
 			if(!test3Passed)
 			{
-				xil_printf("Rendering Test 3 Failed.\n");
+				// xil_printf("Rendering Test 3 Failed.\n");
 				snake::render::Draw();
 			}
 
 			bool test4Passed = Unit4();
 			if(!test4Passed)
 			{
-				xil_printf("Rendering Test 4 Failed.\n");
+				// xil_printf("Rendering Test 4 Failed.\n");
 				snake::render::Draw();
 			}
 
 			bool test5Passed = Unit5();
 			if(!test5Passed)
 			{
-				xil_printf("Rendering Test 5 Failed.\n");
+				// xil_printf("Rendering Test 5 Failed.\n");
 				snake::render::Draw();
 			}
 
 			bool test6Passed = Unit6();
 			if(!test6Passed)
 			{
-				xil_printf("Rendering Test 6 Failed.\n");
+				// xil_printf("Rendering Test 6 Failed.\n");
 				snake::render::Draw();
 			}
 
 			bool test7Passed = Unit7();
 			if(!test7Passed)
 			{
-				xil_printf("Rendering Test 7 Failed.\n");
+				// xil_printf("Rendering Test 7 Failed.\n");
 				snake::render::Draw();
 			}
 
 			bool test8Passed = Unit8();
 			if(!test8Passed)
 			{
-				xil_printf("Rendering Test 8 Failed.\n");
+				// xil_printf("Rendering Test 8 Failed.\n");
 				snake::render::Draw();
 			}
 
 			bool test9Passed = Unit9();
 			if(!test9Passed)
 			{
-				xil_printf("Rendering Test 9 Failed.\n");
+				// xil_printf("Rendering Test 9 Failed.\n");
 				snake::render::Draw();
 			}
 
 			bool test10Passed = Unit10();
 			if(!test10Passed)
 			{
-				xil_printf("Rendering Test 10 Failed.\n");
+				// xil_printf("Rendering Test 10 Failed.\n");
 				snake::render::Draw();
 			}
 
@@ -388,7 +388,7 @@ namespace debug
 			u32 secs = duration;
 			u32 ms = (duration - secs) * 1000;
 
-			xil_printf("Rendered: %u frame buffers in: %u.%03u seconds\n\r", PERF_RENDER_ITRS, secs, ms);
+			// xil_printf("Rendered: %u frame buffers in: %u.%03u seconds\n\r", PERF_RENDER_ITRS, secs, ms);
 
 			delete[] stressTest;
 		}

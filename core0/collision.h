@@ -26,6 +26,8 @@ namespace snake
 		snake::collision::CollisionFlag DetectCollision();
 
 		bool Overlap(const OverlapDims& first, const OverlapDims& second);
+
+		bool IsOutOfBounds(u32 xPos, u32 yPos, u32 width, u32 height);
 	}
 }
 

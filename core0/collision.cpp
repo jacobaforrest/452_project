@@ -35,10 +35,7 @@ namespace snake
 						| static_cast<CollisionFlag>(bodyApple));
 			}
 
-			if( head->m_xPos < GRID_START_X ||
-				head->m_xPos > GRID_START_X + (GRID_SIZE - 1) * SNAKE_BOUNDS ||
-				head->m_yPos < GRID_START_Y ||
-				head->m_yPos > GRID_START_Y + (GRID_SIZE - 1) * SNAKE_BOUNDS )
+			if( IsOutOfBounds(head->m_xPos, head->m_yPos, SNAKE_BOUNDS, SNAKE_BOUNDS) )
 			{
 				collision = static_cast<CollisionFlag>(
 					static_cast<CollisionFlag>(collision)
@@ -81,6 +78,14 @@ namespace snake
 							(second.m_yPos <= first.m_yPos && first.m_yPos < (second.m_yPos + second.m_height));
 
 			return xOverlap && yOverlap;
+		}
+
+		bool IsOutOfBounds(u32 xPos, u32 yPos, u32 width, u32 height)
+		{
+			return  xPos < GRID_START_X ||
+					xPos > GRID_START_X + (GRID_SIZE - 1) * SNAKE_BOUNDS ||
+					yPos < GRID_START_Y ||
+					yPos > GRID_START_Y + (GRID_SIZE - 1) * SNAKE_BOUNDS;
 		}
 	}
 }
