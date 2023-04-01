@@ -144,8 +144,6 @@ namespace snake
 		// xil_printf("xPos: %i\r\n", xPos);
 		// xil_printf("yPos: %i\r\n", yPos);
 
-
-
 		if (dir == 0){ // moving right
 			if (appleX >= GRID_SIZE - 1) // apple on the far right
 			{

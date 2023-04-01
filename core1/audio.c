@@ -10,18 +10,16 @@
 
 #include "audio_sources.h"
 
+// inter-core communication
+#define VOL_VAL (*(std::atomic<unsigned int> *)(0xFFFF0000)) // background audio volume adjustment
+#define MENU_VAL (*(std::atomic<unsigned int> *)(0xFFFF0004)) // menu button selected
+#define CRASH_VAL (*(std::atomic<unsigned int> *)(0xFFFF0008)) // snake wall or tail collision event
+#define CONSUME_VAL (*(std::atomic<unsigned int> *)(0xFFFF000C)) // fruit consumption event
+
 XIicPs Iic;
-unsigned int VOLUME = 1;
+unsigned int VOLUME = 5;
 unsigned int SOUND_EFFECT_VOLUME = 3;
-
-#define VOL_VAL (*(/*volatile*/ std::atomic<unsigned int> *)(0xFFFF0000))
-#define MENU_VAL (*(/*volatile*/ std::atomic<unsigned int> *)(0xFFFF0004))
-#define CRASH_VAL (*(/*volatile*/ std::atomic<unsigned int> *)(0xFFFF0008))
-#define CONSUME_VAL (*(/*volatile*/ std::atomic<unsigned int> *)(0xFFFF000C))
-
 u32* audiobuffers[8];
-
-
 
 int main() {
 	//Configure the IIC data structure
@@ -50,66 +48,77 @@ void audioPlay() {
 	audiobuffers[7] = right_consume_apple_audio;
 
 	audio_playback_file(audiobuffers);
-
 }
 
 
 void audio_playback_file(u32** audiobuffers){
+	// vector of sound effect audio iterators to allow for overlapping audio sound effects
 	std::vector<u32> menu_iterators;
 	std::vector<u32> consume_iterators;
 	std::vector<u32> crash_iterators;
+
 	u32 curr_output_left;
 	u32 curr_output_right;
 
 	while(1){
+		// Main loop to play the background audio
+		// Each iteration outputs a single audio sample
 		for(u32 i=0; i<background_size; i++){
 
 			VOLUME = VOL_VAL.load();
 
+			// audio sample to be output
 			curr_output_left = audiobuffers[0][i] * VOLUME;
 			curr_output_right = audiobuffers[1][i] * VOLUME;
 
-			if (MENU_VAL.load() == 1 /*&& menu_iter < menu_buttons_size*/){
-
-				menu_iterators.push_back(0);
-				MENU_VAL.store(0);
+			// check if a menu option was clicked
+			if (MENU_VAL.load() == 1){
+				menu_iterators.push_back(0); // add an iterator to begin adding the menu button audio samples to the background audio samples
+				MENU_VAL.store(0); // reset the menu event communication value
 			}
-			for (u32 j = 0; j < menu_iterators.size(); j++){
+			for (u32 j = 0; j < menu_iterators.size(); j++){ // for each time that a menu button was clicked and the corresponding sound effect audio has not completed playback
+				
+				// add audio sound effect to the current audio sample
 				curr_output_left = curr_output_left + audiobuffers[2][menu_iterators[j]] * SOUND_EFFECT_VOLUME;
 				curr_output_right = curr_output_right + audiobuffers[3][menu_iterators[j]] * SOUND_EFFECT_VOLUME;
 				menu_iterators[j] = menu_iterators[j] + 1;
-				if (menu_iterators[j] == menu_buttons_size - 1){
-					menu_iterators.erase(menu_iterators.begin()+j);
+				if (menu_iterators[j] == menu_buttons_size - 1){ // if the audio sound effect has completed playback
+					menu_iterators.erase(menu_iterators.begin()+j); // remove the iterator for the current sound effect
 					j--;
 				}
 			}
 
+			// check if a crash event has occured
 			if (CRASH_VAL.load() == 1){
-
-				crash_iterators.push_back(0);
-				CRASH_VAL.store(0);
+				crash_iterators.push_back(0); // add an iterator to begin adding the crash event audio samples to the backgrounnd audio samples
+				CRASH_VAL.store(0); // reset the crash event communication value
 			}
-			for (u32 j = 0; j < crash_iterators.size(); j++){
+			for (u32 j = 0; j < crash_iterators.size(); j++){ // for each time that a crash even occured and the corresponding sound effect audio has not completed playback
+
+				// add audio sound effect to the current audio sample
 				curr_output_left = curr_output_left + audiobuffers[4][crash_iterators[j]] * SOUND_EFFECT_VOLUME;
 				curr_output_right = curr_output_right + audiobuffers[5][crash_iterators[j]] * SOUND_EFFECT_VOLUME;
 				crash_iterators[j] = crash_iterators[j] + 1;
-				if (crash_iterators[j] == gameover_size - 1){
-					crash_iterators.erase(crash_iterators.begin()+j);
+				if (crash_iterators[j] == gameover_size - 1){ // if the audio sound effect has completed playback
+					crash_iterators.erase(crash_iterators.begin()+j); // remove the iterator for the current sound effect
 					j--;
 				}
 			}
 
+			// check if a consumption event has occured
 			if (CONSUME_VAL.load() == 1){
 
-				consume_iterators.push_back(0);
-				CONSUME_VAL.store(0);
+				consume_iterators.push_back(0); // add an iterator to begin adding the consumption audio samples to the background audio samples
+				CONSUME_VAL.store(0); // reset the consumption event communication value
 			}
-			for (u32 j = 0; j < consume_iterators.size(); j++){
+			for (u32 j = 0; j < consume_iterators.size(); j++){ // for each time that a consumption event occured and the corresponding sound effect audio has not completed playback
+
+				// add audio sound effect to the current audio sample
 				curr_output_left = curr_output_left + audiobuffers[6][consume_iterators[j]] * SOUND_EFFECT_VOLUME;
 				curr_output_right = curr_output_right + audiobuffers[7][consume_iterators[j]] * SOUND_EFFECT_VOLUME;
 				consume_iterators[j] = consume_iterators[j] + 1;
-				if (consume_iterators[j] == consume_apple_size - 1){
-					consume_iterators.erase(consume_iterators.begin()+j);
+				if (consume_iterators[j] == consume_apple_size - 1){ // if the audio sound effect has completed playback
+					consume_iterators.erase(consume_iterators.begin()+j); // remove the iterator for the current sound effect
 					j--;
 				}
 			}
@@ -118,60 +127,8 @@ void audio_playback_file(u32** audiobuffers){
 			Xil_Out32(I2S_DATA_TX_L_REG, curr_output_left);
 			Xil_Out32(I2S_DATA_TX_R_REG, curr_output_right);
 
-			usleep(21);
+			usleep(21); // ~ 48 KHz
 
-//			if (MENU_VAL.load() == 0 && CRASH_VAL.load() == 0 && CONSUME_VAL.load() == 0){
-//				// Write audio output to codec
-//				VOLUME = VOL_VAL.load();
-//				Xil_Out32(I2S_DATA_TX_L_REG, audiobuffers[0][i] * VOLUME);
-//				Xil_Out32(I2S_DATA_TX_R_REG, audiobuffers[1][i] * VOLUME);
-//			}
-//
-//
-//			if (MENU_VAL.load() == 1 /*&& menu_iter < menu_buttons_size*/){
-//
-//				Xil_Out32(I2S_DATA_TX_L_REG, audiobuffers[2][menu_iter] * SOUND_EFFECT_VOLUME);
-//				Xil_Out32(I2S_DATA_TX_R_REG, audiobuffers[3][menu_iter] * SOUND_EFFECT_VOLUME);
-//
-//				if (menu_iter == menu_buttons_size - 1){
-//					menu_iter = 0;
-//					MENU_VAL.store(0);
-//				}
-//				else{
-//					menu_iter++;
-//				}
-//			}
-//
-//			if (CRASH_VAL.load() == 1){
-//
-//				Xil_Out32(I2S_DATA_TX_L_REG, audiobuffers[4][crash_iter] * SOUND_EFFECT_VOLUME);
-//				Xil_Out32(I2S_DATA_TX_R_REG, audiobuffers[5][crash_iter] * SOUND_EFFECT_VOLUME);
-//
-//				if (crash_iter == gameover_size - 1){
-//					crash_iter = 0;
-//					CRASH_VAL.store(0);
-//				}
-//				else{
-//					crash_iter++;
-//				}
-//			}
-//
-//			if (CONSUME_VAL.load() == 1){
-//
-//				Xil_Out32(I2S_DATA_TX_L_REG, audiobuffers[6][consume_iter] * SOUND_EFFECT_VOLUME);
-//				Xil_Out32(I2S_DATA_TX_R_REG, audiobuffers[7][consume_iter] * SOUND_EFFECT_VOLUME);
-//
-//				if (consume_iter == consume_apple_size - 1){
-//					consume_iter = 0;
-//					CONSUME_VAL.store(0);
-//				}
-//				else{
-//					consume_iter++;
-//				}
-//			}
-//
-//
-//			usleep(21);
 		}
 	}
 	return;
