@@ -15,7 +15,6 @@
 #include "xtime_l.h"
 #include "xil_mmu.h"
 #include "xscugic.h"
-#include "xtmrctr.h"
 
 #include "snakeHelper.h"
 

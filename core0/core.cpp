@@ -243,7 +243,6 @@ void finiteStateMachine()
 
 				enum direction currentDirection = right;
 				enum direction newDirection = right;
-				draw_grid();
 				initialize_snake();
 				new_pos = RNG_get();
 				spawn_apple(new_pos);
@@ -279,7 +278,7 @@ void finiteStateMachine()
 
 						query_input(input, currentDirection, newDirection, tStart, tEnd, tPausedStart, tPausedEnd, tPauseElapsed);
 
-						snake::UpdateTime((u32) deltaTimeElapsed)
+						snake::UpdateTime((u32) deltaTimeElapsed);
 						
 					}
 
@@ -299,7 +298,7 @@ void finiteStateMachine()
 
 						query_input(input, currentDirection, newDirection, tStart, tEnd, tPausedStart, tPausedEnd, tPauseElapsed);
 
-						snake::UpdateTime((u32) deltaTimeElapsed)
+						snake::UpdateTime((u32) deltaTimeElapsed);
 					}
 
 					move_snake(currentDirection);
@@ -309,8 +308,6 @@ void finiteStateMachine()
 					if (collision & snake::collision::apple == snake::collision::apple)
 					{
 						// xil_printf("Apple Collision\r\n");
-						play_apple_sound_effect();
-						consume_apple();
 						update_score();
 						extend_snake();
 						new_pos = RNG_get();
@@ -395,7 +392,6 @@ void finiteStateMachine()
 
 				while (currentState == gameover)
 				{
-					draw_gameover_menu(cursor_position);
 					// xil_printf("Press 's' to select the currently highlighted option\r\n");
 					// xil_printf("Press 'w' to move the cursor up\r\n");
 					// xil_printf("Press 'x' to move the cursor down\r\n");
@@ -752,7 +748,6 @@ void query_input(u8 input, direction& currentDirection, direction& newDirection,
 		case 'p':
 		{
 			XTime_GetTime(&tPausedStart);
-			pause_game();
 			input = '~';
 			while (input != 'r')
 			{
