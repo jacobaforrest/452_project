@@ -1,0 +1,35 @@
+#-----------------------------------------------------------
+# Vivado v2020.2 (64-bit)
+# SW Build 3064766 on Wed Nov 18 09:12:45 MST 2020
+# IP Build 3064653 on Wed Nov 18 14:17:31 MST 2020
+# Start of session at: Sat Apr  1 15:24:23 2023
+# Process ID: 20804
+# Current directory: C:/Users/jacob/Documents/GitHub/452_project/VivadoProject/audio_backup
+# Command line: vivado.exe -gui_launcher_event rodinguilauncherevent22788 C:\Users\jacob\Documents\GitHub\452_project\VivadoProject\audio_backup\audio_backup.xpr
+# Log file: C:/Users/jacob/Documents/GitHub/452_project/VivadoProject/audio_backup/vivado.log
+# Journal file: C:/Users/jacob/Documents/GitHub/452_project/VivadoProject/audio_backup\vivado.jou
+#-----------------------------------------------------------
+start_gui
+open_project C:/Users/jacob/Documents/GitHub/452_project/VivadoProject/audio_backup/audio_backup.xpr
+INFO: [Project 1-313] Project file moved from 'C:/Zynq_Book/audio_backup' since last save.
+INFO: [filemgmt 56-1] IP Repository Path: Directory not found as 'C:/Users/jacob/Documents/GitHub/452_project/VivadoProject/ip_repo'; using path 'C:/Zynq_Book/ip_repo' instead.
+Scanning sources...
+Finished scanning sources
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1700] Loaded user IP repository 'c:/Zynq_Book/ip_repo'.
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'C:/Xilinx/Vivado/2020.2/data/ip'.
+open_project: Time (s): cpu = 00:00:04 ; elapsed = 00:00:08 . Memory (MB): peak = 1202.551 ; gain = 0.000
+update_compile_order -fileset sources_1
+open_bd_design {C:/Users/jacob/Documents/GitHub/452_project/VivadoProject/audio_backup/audio_backup.srcs/sources_1/bd/design_1/design_1.bd}
+Reading block design file <C:/Users/jacob/Documents/GitHub/452_project/VivadoProject/audio_backup/audio_backup.srcs/sources_1/bd/design_1/design_1.bd>...
+Adding component instance block -- xilinx.com:ip:processing_system7:5.5 - processing_system7_0
+Adding component instance block -- xilinx.com:ip:clk_wiz:6.0 - clk_wiz_0
+Adding component instance block -- xilinx.com:ip:proc_sys_reset:5.0 - proc_sys_reset_0
+Adding component instance block -- xilinx.com:user:RNG:1.0 - RNG_0
+Adding component instance block -- user.org:user:vga_controller:1.0 - vga_controller_0
+Adding component instance block -- xilinx.com:user:zed_audio_ctrl:1.0 - zed_audio_ctrl_0
+Adding component instance block -- xilinx.com:ip:axi_gpio:2.0 - axi_gpio_0
+Adding component instance block -- xilinx.com:ip:proc_sys_reset:5.0 - proc_sys_reset_1
+Adding component instance block -- xilinx.com:ip:smartconnect:1.0 - smartconnect_0
+Successfully read diagram <design_1> from block design file <C:/Users/jacob/Documents/GitHub/452_project/VivadoProject/audio_backup/audio_backup.srcs/sources_1/bd/design_1/design_1.bd>
+open_bd_design: Time (s): cpu = 00:00:06 ; elapsed = 00:00:07 . Memory (MB): peak = 1202.551 ; gain = 0.000
