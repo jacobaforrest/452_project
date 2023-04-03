@@ -310,6 +310,7 @@ void finiteStateMachine()
 						// xil_printf("Apple Collision\r\n");
 						update_score();
 						extend_snake();
+						play_apple_sound_effect();
 						new_pos = RNG_get();
 						spawn_apple(new_pos);
 						snake::Render(currentState);
