@@ -1,5 +1,5 @@
-set_property SRC_FILE_INFO {cfile:C:/Zynq_Book/audio_backup/audio_backup.srcs/constrs_1/imports/vga_tutorial_students/zedboard_master.xdc rfile:../../../audio_backup.srcs/constrs_1/imports/vga_tutorial_students/zedboard_master.xdc id:1} [current_design]
-set_property SRC_FILE_INFO {cfile:C:/Zynq_Book/audio_backup/audio_backup.srcs/constrs_1/new/audio.xdc rfile:../../../audio_backup.srcs/constrs_1/new/audio.xdc id:2} [current_design]
+set_property SRC_FILE_INFO {cfile:C:/Users/jacob/Documents/GitHub/452_project/VivadoProject/audio_backup/audio_backup.srcs/constrs_1/imports/vga_tutorial_students/zedboard_master.xdc rfile:../../../audio_backup.srcs/constrs_1/imports/vga_tutorial_students/zedboard_master.xdc id:1} [current_design]
+set_property SRC_FILE_INFO {cfile:C:/Users/jacob/Documents/GitHub/452_project/VivadoProject/audio_backup/audio_backup.srcs/constrs_1/new/audio.xdc rfile:../../../audio_backup.srcs/constrs_1/new/audio.xdc id:2} [current_design]
 set_property src_info {type:XDC file:1 line:187 export:INPUT save:INPUT read:READ} [current_design]
 set_property PACKAGE_PIN Y21  [get_ports {VGA_B[0]}];  # "VGA-B1"
 set_property src_info {type:XDC file:1 line:188 export:INPUT save:INPUT read:READ} [current_design]
