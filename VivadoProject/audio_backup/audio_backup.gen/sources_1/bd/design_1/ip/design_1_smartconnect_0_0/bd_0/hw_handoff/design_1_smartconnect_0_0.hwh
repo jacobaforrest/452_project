@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Sun Apr  9 17:33:03 2023" VIVADOVERSION="2020.2">
+<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Sat Apr  1 14:49:14 2023" VIVADOVERSION="2020.2">
 
   <SYSTEMINFO ARCH="zynq" BOARD="em.avnet.com:zed:part0:1.4" DEVICE="7z020" NAME="bd_48ac" PACKAGE="clg484" SPEEDGRADE="-1"/>
 

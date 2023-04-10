@@ -46,7 +46,7 @@ begin
         if (rst='0') then
             lfsr_reg <= seed;
         elsif (clk'event and clk='1') then
-            lfsr_reg(31) <= (lfsr_reg(1) xor lfsr_reg(5)) xor lfsr_reg(6) xor lfsr_reg(31);
+            lfsr_reg(31) <= (lfsr_reg(30) xor lfsr_reg(23)) xor lfsr_reg(19);
             lfsr_reg(30 downto 0) <= lfsr_reg(31 downto 1);
         end if;
     end process;

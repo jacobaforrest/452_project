@@ -2,11 +2,11 @@
 # Vivado v2020.2 (64-bit)
 # SW Build 3064766 on Wed Nov 18 09:12:45 MST 2020
 # IP Build 3064653 on Wed Nov 18 14:17:31 MST 2020
-# Start of session at: Sun Apr  9 17:33:33 2023
-# Process ID: 28096
-# Current directory: C:/Users/jacob/Documents/GitHub/452_project/VivadoProject/audio_backup/audio_backup.runs/synth_1
+# Start of session at: Sat Apr  1 14:50:26 2023
+# Process ID: 1300
+# Current directory: C:/Zynq_Book/audio_backup/audio_backup.runs/synth_1
 # Command line: vivado.exe -log design_1_wrapper.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source design_1_wrapper.tcl
-# Log file: C:/Users/jacob/Documents/GitHub/452_project/VivadoProject/audio_backup/audio_backup.runs/synth_1/design_1_wrapper.vds
-# Journal file: C:/Users/jacob/Documents/GitHub/452_project/VivadoProject/audio_backup/audio_backup.runs/synth_1\vivado.jou
+# Log file: C:/Zynq_Book/audio_backup/audio_backup.runs/synth_1/design_1_wrapper.vds
+# Journal file: C:/Zynq_Book/audio_backup/audio_backup.runs/synth_1\vivado.jou
 #-----------------------------------------------------------
 source design_1_wrapper.tcl -notrace

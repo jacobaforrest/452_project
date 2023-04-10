@@ -24,7 +24,7 @@ else
 fi
 export LD_LIBRARY_PATH
 
-HD_PWD='C:/Users/jacob/Documents/GitHub/452_project/VivadoProject/audio_backup/audio_backup.runs/synth_1'
+HD_PWD='C:/Zynq_Book/audio_backup/audio_backup.runs/synth_1'
 cd "$HD_PWD"
 
 HD_LOG=runme.log
